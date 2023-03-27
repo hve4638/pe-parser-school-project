@@ -27,8 +27,14 @@ void Close(const char* message) {
 void Parse(const char* file) {
 	ParseDosHeader(file);
 
-	if (Is32Bit()) Parse32();
-	else Parse64();
+	if (Is32Bit()) {
+		
+		Parse32();
+	}
+	else {
+		Parse64();
+	}
+	
 }
 
 void ParseDosHeader(const char* file) {

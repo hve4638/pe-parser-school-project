@@ -24,6 +24,12 @@
     <ClCompile Include="peshow.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="peparser.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="peparsershow.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="peparser.h">

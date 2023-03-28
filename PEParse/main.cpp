@@ -1,12 +1,10 @@
 #include "peparser.h"
 
+using namespace PEParse;
 
 int main(int argc, char* argv[]) {
-	PEParser parser = argv[0];
+	PEParser parser = argv[1];
 	parser.Show();
-
-	/*
-	Parse(argv[0]);
-	Show();*/
+	return 0;
 }
 

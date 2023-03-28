@@ -131,8 +131,6 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="peparser.cpp" />
     <ClCompile Include="peparsershow.cpp" />
-    <ClCompile Include="perparse.cpp" />
-    <ClCompile Include="peshow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="peparser.h" />

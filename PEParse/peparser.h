@@ -20,38 +20,51 @@ namespace PEParse {
 		other,
 	};
 
+	typedef struct {
+		IMAGE_DOS_HEADER* dosHeader;
+		union {
+			IMAGE_NT_HEADERS32* x86;
+			IMAGE_NT_HEADERS64* x64;
+		} ntHeader;
+		IMAGE_SECTION_HEADER** sectionHeader;
+		int sectionCount;
+	} PEHeader;
+
+	typedef struct {
+		BYTE* dosStub;
+		BYTE** section;
+	} PEBody;
+
 	class PEParser {
 	private:
 		MACHINE_TYPE m_machineType = other;
 		HANDLE m_fileHandle = NULL;
 		HANDLE m_mapping = NULL;
 		LPVOID m_base = NULL;
-		IMAGE_DOS_HEADER* m_dosHeader = NULL;
-		IMAGE_NT_HEADERS32* m_ntHeader = NULL;
-		//IMAGE_NT_HEADERS32* m_ntHeader32 = NULL;
-		//IMAGE_NT_HEADERS64* m_ntHeader64 = NULL;
+		PEHeader m_header;
+		PEBody m_body;
 
-		int m_sectionCount;
-		IMAGE_SECTION_HEADER* m_sectionHeader[128];
-		BYTE* m_section[128];
-
-		void ReadFileAndMapping(LPCSTR);
-		void ParseDosHeader();
-		void Parse32();
-		void Parse64();
-		void Show32();
-		void Show64();
-		void CloseAndAbort(LPCSTR);
-		void ParseSections(BYTE*, BYTE*, size_t);
-		void ParseNTHeaderAndSetMachineType();
-		LPVOID GetStoragePosition(LPVOID);
+		void readFileAndMapping(LPCSTR);
+		void parseDosHeader();
+		void parse32();
+		void parse64();
+		void show32();
+		void show64();
+		void closeAndAbort(LPCSTR);
+		void parseSections(BYTE*, BYTE*);
+		void parseNTHeaderAndSetMachineType();
+		LPVOID getDiskPosition(LPVOID);
+		void showBuffer(BYTE*, size_t size);
 	public:
 		PEParser(LPCSTR);
 		~PEParser();
-		void Parse(LPCSTR);
-		void Show();
-		void ShowSectionHeaders();
-		void ShowPosition();
-		MACHINE_TYPE GetMachineType();
+		void parse(LPCSTR);
+		void show();
+		void showSectionHeaders();
+		void showPosition();
+		PEHeader getPEHeader();
+		PEBody getPEBody();
+
+		MACHINE_TYPE getMachineType();
 	};
 }

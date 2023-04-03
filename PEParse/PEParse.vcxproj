@@ -129,8 +129,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="peparser.cpp" />
-    <ClCompile Include="peparsershow.cpp" />
+    <ClCompile Include="parsing.cpp" />
+    <ClCompile Include="showing.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="peparser.h" />

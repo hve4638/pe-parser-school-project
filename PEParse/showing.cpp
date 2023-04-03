@@ -1,52 +1,66 @@
 #include "peparser.h"
 #include <iostream>
 
-
 using namespace std;
 
 namespace PEParse {
-	void PEParser::Show() {
+	void PEParser::showBuffer(BYTE* buffer, size_t size) {
+		for (size_t i = 0; i < size; i += 16) {
+			for (size_t j = i; j < size && j < i + 16; j++) {
+				printf("%02x ", buffer[j]);
+				if (j % 8 == 7) printf(" ");
+			}
+			for (size_t j = i; j < size && j < i + 16; j++) {
+				char ch = buffer[j];
+				if (isprint(ch)) printf("%c", ch);
+				else printf(".");
+			}
+
+			printf("\n");
+		}
+	}
+
+	void PEParser::show() {
 		if (m_machineType == x86) {
-			Show32();
+			show32();
 		}
 		else if (m_machineType == x64) {
-			Show64();
+			show64();
 		}
 		else {
-			tcout << "Show() : nothing to show" << endl;
+			tcout << "show() : nothing to show" << endl;
 			return;
 		}
 
-		ShowPosition();
-		//ShowSectionHeaders();
+		showPosition();
 	}
 
-	LPVOID PEParser::GetStoragePosition(LPVOID position) {
+	LPVOID PEParser::getDiskPosition(LPVOID position) {
 		long long positionPtr = (long long)position;
 		long long basePtr = (long long)m_base;
 
 		return (LPVOID)(positionPtr - basePtr);
 	}
 
-	void PEParser::ShowPosition() {
+	void PEParser::showPosition() {
 		tcout << "Position:" << endl;
-		tcout << hex << "  Dos Header: 0x" << GetStoragePosition(m_dosHeader) << endl;
-		tcout << hex << "  NT Header : 0x" << GetStoragePosition(m_ntHeader) << endl;
+		tcout << hex << "  Dos Header: 0x" << getDiskPosition(m_header.dosHeader) << endl;
+		tcout << hex << "  NT Header : 0x" << getDiskPosition(m_header.ntHeader.x64) << endl;
 
-		for (int i = 0; i < m_sectionCount; i++) {
-			auto header = m_sectionHeader[i];
-			tcout << "  section header (" << (char*)header->Name << ") : 0x" << GetStoragePosition(header) << endl;
+		for (int i = 0; i < m_header.sectionCount; i++) {
+			auto header = m_header.sectionHeader[i];
+			tcout << "  section header (" << (char*)header->Name << ") : 0x" << getDiskPosition(header) << endl;
 		}
 
-		for (int i = 0; i < m_sectionCount; i++) {
-			auto header = m_sectionHeader[i];
-			auto section = m_section[i];
-			tcout << "  sections (" << (char*)header->Name << ") : 0x" << GetStoragePosition(section) << endl;
+		for (int i = 0; i < m_header.sectionCount; i++) {
+			auto header = m_header.sectionHeader[i];
+			auto section = m_body.section[i];
+			tcout << "  sections (" << (char*)header->Name << ") : 0x" << getDiskPosition(section) << endl;
 		}
 	}
 
-	void PEParser::Show32() {
-		auto ntHeader = (IMAGE_NT_HEADERS32*)m_ntHeader;
+	void PEParser::show32() {
+		auto ntHeader = m_header.ntHeader.x86;
 		tcout << "PE header information:" << endl;
 		tcout << hex << "  Machine type: 0x" << ntHeader->FileHeader.Machine << endl;
 		tcout << dec << "  Number of sections: " << ntHeader->FileHeader.NumberOfSections << endl;
@@ -63,8 +77,8 @@ namespace PEParse {
 		tcout << endl;
 	}
 
-	void PEParser::Show64() {
-		auto ntHeader = (IMAGE_NT_HEADERS64*)m_ntHeader;
+	void PEParser::show64() {
+		auto ntHeader = m_header.ntHeader.x64;
 		tcout << "PE header information:" << endl;
 		tcout << hex << "  Machine type: 0x" << ntHeader->FileHeader.Machine << endl;
 		tcout << dec << "  Number of sections: " << ntHeader->FileHeader.NumberOfSections << endl;
@@ -81,10 +95,10 @@ namespace PEParse {
 		tcout << endl;
 	}
 
-	void PEParser::ShowSectionHeaders() {
-		tcout << "Section Headers (" << m_sectionCount << ")" << endl;
-		for (int i = 0; i < m_sectionCount; i++) {
-			IMAGE_SECTION_HEADER* header = m_sectionHeader[i];
+	void PEParser::showSectionHeaders() {
+		tcout << "Section Headers (" << m_header.sectionCount << ")" << endl;
+		for (int i = 0; i < m_header.sectionCount; i++) {
+			IMAGE_SECTION_HEADER* header = m_header.sectionHeader[i];
 			printf("[%d] %s\n", i, header->Name);
 			printf("     Size of rawdata: (0x%x)\n", header->SizeOfRawData);
 			printf("     Pointer to rawdata : (0x%x)\n", header->PointerToRawData);

@@ -18,10 +18,10 @@
     <ClCompile Include="main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="peparser.cpp">
+    <ClCompile Include="parsing.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="peparsershow.cpp">
+    <ClCompile Include="showing.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

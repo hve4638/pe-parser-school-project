@@ -129,7 +129,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="parseDataDirectory.cpp" />
     <ClCompile Include="parsing.cpp" />
+    <ClCompile Include="showbuffer.cpp" />
     <ClCompile Include="showing.cpp" />
   </ItemGroup>
   <ItemGroup>

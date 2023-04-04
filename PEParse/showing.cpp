@@ -12,8 +12,8 @@ namespace PEParse {
 			}
 			for (size_t j = i; j < size && j < i + 16; j++) {
 				char ch = buffer[j];
-				if (isprint(ch)) printf("%c", ch);
-				else printf(".");
+				if (isprint(ch)) tcout << ch << endl;
+				else tcout << "." << endl;
 			}
 
 			printf("\n");

@@ -20,6 +20,14 @@ namespace PEParse {
 		other,
 	};
 
+	/*
+	typedef struct {
+		tstring sectionName;
+		DWORD VirtualAddress;
+		DWORD PointerToRawData;
+		DWORD SizeOfRawData;
+	};/**/
+
 	typedef struct {
 		IMAGE_DOS_HEADER* dosHeader;
 		union {
@@ -27,6 +35,7 @@ namespace PEParse {
 			IMAGE_NT_HEADERS64* x64;
 		} ntHeader;
 		IMAGE_SECTION_HEADER** sectionHeader;
+		IMAGE_DATA_DIRECTORY* DataDirectory;
 		int sectionCount;
 	} PEHeader;
 
@@ -35,14 +44,44 @@ namespace PEParse {
 		BYTE** section;
 	} PEBody;
 
+	typedef struct {
+		PEHeader* header;
+		PEBody* body;
+		MACHINE_TYPE type;
+		LPVOID base;
+	} PEView;
+
+	class PEDataDirectoryParser {
+	private:
+		static const char* directoryName[16];
+		PEView* m_view;
+		IMAGE_DATA_DIRECTORY* m_dataDirectory;
+		bool m_dataDirectoryExists[16] = { 0, };
+		DWORD m_virtualAddress = 0;
+		DWORD m_pointerOfRawData = 0;
+
+		void initDataDirectory();
+		DWORD getRAW(DWORD, int);
+		int findHeader(DWORD);
+	public:
+		PEDataDirectoryParser();
+		PEDataDirectoryParser(PEView*);
+		void setDataDirectory(IMAGE_DATA_DIRECTORY*);
+
+		void parseExportDirectory();
+		void show();
+	};
+
 	class PEParser {
 	private:
+		PEView m_view;
+		PEHeader m_header;
+		PEBody m_body;
+		PEDataDirectoryParser m_dataDirectoryParser;
 		MACHINE_TYPE m_machineType = other;
 		HANDLE m_fileHandle = NULL;
 		HANDLE m_mapping = NULL;
 		LPVOID m_base = NULL;
-		PEHeader m_header;
-		PEBody m_body;
 
 		void readFileAndMapping(LPCSTR);
 		void parseDosHeader();
@@ -64,7 +103,10 @@ namespace PEParse {
 		void showPosition();
 		PEHeader getPEHeader();
 		PEBody getPEBody();
+		void parseDataDirectory();
 
 		MACHINE_TYPE getMachineType();
 	};
+
+	void printBuffer(BYTE*, size_t);
 }

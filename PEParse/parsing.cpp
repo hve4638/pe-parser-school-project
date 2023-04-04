@@ -5,6 +5,18 @@ using namespace std;
 namespace PEParse {
 	PEParser::PEParser(LPCSTR filename) {
 		parse(filename);
+		tcout << "base: " << m_base << endl;
+
+		m_view.type = m_machineType;
+		m_view.header = &m_header;
+		m_view.body = &m_body;
+		m_view.base = (long long)m_base;
+	}
+
+	PEParser::~PEParser() {
+		if (m_fileHandle != NULL) CloseHandle(m_fileHandle);
+		if (m_mapping != NULL) CloseHandle(m_mapping);
+		if (m_base != NULL) UnmapViewOfFile(m_base);
 	}
 
 	void PEParser::parse(LPCSTR filename) {
@@ -59,6 +71,8 @@ namespace PEParse {
 		BYTE* bodyStartPosition = (BYTE*)m_base;
 		BYTE* sectionStartPosition = ((BYTE*)&(ntHeader->OptionalHeader) + sizeOfOptionalHeader);
 
+		m_header.DataDirectory = ntHeader->OptionalHeader.DataDirectory;
+
 		parseSections(sectionStartPosition, bodyStartPosition);
 	}
 	void PEParser::parse64() {
@@ -71,6 +85,8 @@ namespace PEParse {
 		m_header.sectionCount = ntHeader->FileHeader.NumberOfSections;
 		BYTE* bodyStartPosition = (BYTE*)m_base;
 		BYTE* sectionStartPosition = ((BYTE*)&(ntHeader->OptionalHeader) + sizeOfOptionalHeader);
+
+		m_header.DataDirectory = ntHeader->OptionalHeader.DataDirectory;
 
 		parseSections(sectionStartPosition, bodyStartPosition);
 	}
@@ -99,11 +115,6 @@ namespace PEParse {
 		exit(1);
 	}
 
-	PEParser::~PEParser() {
-		if (m_fileHandle != NULL) CloseHandle(m_fileHandle);
-		if (m_mapping != NULL) CloseHandle(m_mapping);
-		if (m_base != NULL) UnmapViewOfFile(m_base);
-	}
 
 	MACHINE_TYPE PEParser::getMachineType() {
 		return m_machineType;
@@ -115,5 +126,11 @@ namespace PEParse {
 
 	PEBody PEParser::getPEBody() {
 		return m_body;
+	}
+
+	void PEParser::parseDataDirectory() {
+		m_dataDirectoryParser = { &m_view };
+		m_dataDirectoryParser.parseExportDirectory();
+		//m_dataDirectoryParser.show();
 	}
 }

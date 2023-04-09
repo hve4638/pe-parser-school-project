@@ -47,6 +47,30 @@ namespace PEParse {
 		m_dataDirectory = dataDirectory;
 	}
 
+	void PEDataDirectoryParser::parseDirectoryOffset() {
+		for (int i = 0; i < 16; i++) {
+			DWORD rva = m_dataDirectory[0].VirtualAddress;
+			DWORD size = m_dataDirectory[0].Size;
+			long long base = (DWORD)m_view->base;
+
+			if (rva != NULL) {
+				m_dataDirectoryExists[i] = true;
+				int index = findHeader(rva);
+				auto raw = getRAW(rva, index);
+				auto p = (long long)m_view->base + (long long)raw;
+				
+				m_dataDirectoryContents[i] = (LPVOID)p;
+			}
+			else {
+				m_dataDirectoryExists[i] = false;
+			}
+		}
+	}
+
+	void PEDataDirectoryParser::parse() {
+		parseDirectoryOffset();
+	}
+
 	void PEDataDirectoryParser::parseExportDirectory() {
 		DWORD rva = m_dataDirectory[0].VirtualAddress;
 		DWORD size = m_dataDirectory[0].Size;
@@ -58,17 +82,22 @@ namespace PEParse {
 		else {
 			int index = findHeader(rva);
 			auto raw = getRAW(rva, index);
-			IMAGE_EXPORT_DIRECTORY* exportDirectory = (IMAGE_EXPORT_DIRECTORY*)(raw + base);
+			auto a = (long long)m_view->base + (long long)raw;
+			IMAGE_EXPORT_DIRECTORY* exportDirectory = (IMAGE_EXPORT_DIRECTORY*)(a);
 			
 			tcout << hex;
 			tcout << "RVA - " << rva << endl;
 			tcout << "RAW - " << raw << endl;
-			tcout << "result : " << exportDirectory << endl;
 			tcout << "base: " << base << endl;
+			tcout << "result : " << exportDirectory << endl;
+			tcout << "L RAW - " << (long long)raw << endl;
+			tcout << "L base: " << (long long)base << endl;
+			tcout << "L base: " << (long long)base + (long long)raw << endl;
+			tcout << m_view->base << endl;
 
+			tcout << exportDirectory->TimeDateStamp << endl;
 			tcout << dec;
 			tcout << "index - " << index << endl;
-
 
 			printBuffer((BYTE*)exportDirectory, size);
 		}
@@ -92,9 +121,6 @@ namespace PEParse {
 			IMAGE_SECTION_HEADER* header = m_view->header->sectionHeader[i];
 			DWORD vaBegin = header->VirtualAddress;// -header->PointerToRawData;
 			DWORD vaEnd = vaBegin + header->SizeOfRawData;
-			tcout << hex;
-			tcout << vaBegin << " <= " << RVA << " < " << vaEnd << endl;
-			tcout << dec;
 
 			if (RVA >= vaBegin && RVA < vaEnd) return i;
 		}

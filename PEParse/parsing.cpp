@@ -125,7 +125,7 @@ namespace PEParse {
 
 	void PEParser::parseDataDirectory() {
 		m_dataDirectoryParser = { &m_view };
-		m_dataDirectoryParser.parseExportDirectory();
+		m_dataDirectoryParser.parse();
 		//m_dataDirectoryParser.show();
 	}
 }

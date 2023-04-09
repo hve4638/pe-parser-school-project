@@ -6,7 +6,8 @@ using namespace std;
 namespace PEParse {
 
 	void PEParser::show() {
-		showPosition();
+		m_dataDirectoryParser.show();
+		//showPosition();
 
 		if (m_machineType == x86) {
 			show32();

@@ -10,9 +10,10 @@ namespace PEParse {
 				if (j % 8 == 7) printf(" ");
 			}
 			for (size_t j = i; j < size && j < i + 16; j++) {
-				char ch = buffer[j];
-				if (isprint(ch)) tcout << ch << endl;
-				else tcout << "." << endl;
+				unsigned char ch = buffer[j];
+				if (isprint(ch)) tcout << (char)ch;
+				else tcout << ".";
+				if (j % 8 == 7) printf(" ");
 			}
 
 			printf("\n");

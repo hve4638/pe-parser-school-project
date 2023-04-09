@@ -51,14 +51,17 @@ namespace PEParse {
 		bool m_dataDirectoryExists[16] = { 0, };
 		DWORD m_virtualAddress = 0;
 		DWORD m_pointerOfRawData = 0;
+		LPVOID m_dataDirectoryContents[16] = { 0, };
 
 		void initDataDirectory();
 		DWORD getRAW(DWORD, int);
 		int findHeader(DWORD);
+		void parseDirectoryOffset();
 	public:
 		PEDataDirectoryParser();
 		PEDataDirectoryParser(PEView*);
 		void setDataDirectory(IMAGE_DATA_DIRECTORY*);
+		void parse();
 
 		void parseExportDirectory();
 		void show();

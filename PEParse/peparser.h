@@ -20,14 +20,6 @@ namespace PEParse {
 		other,
 	};
 
-	/*
-	typedef struct {
-		tstring sectionName;
-		DWORD VirtualAddress;
-		DWORD PointerToRawData;
-		DWORD SizeOfRawData;
-	};/**/
-
 	typedef struct {
 		IMAGE_DOS_HEADER* dosHeader;
 		union {
@@ -45,7 +37,7 @@ namespace PEParse {
 	} PEBody;
 
 	typedef struct {
-		PEHeader* header;
+		PEHeader* header; 
 		PEBody* body;
 		MACHINE_TYPE type;
 		LPVOID base;
@@ -90,10 +82,9 @@ namespace PEParse {
 		void show32();
 		void show64();
 		void closeAndAbort(LPCSTR);
-		void parseSections(BYTE*, BYTE*);
+		void parseSections(BYTE*);
 		void parseNTHeaderAndSetMachineType();
 		LPVOID getDiskPosition(LPVOID);
-		void showBuffer(BYTE*, size_t size);
 	public:
 		PEParser(LPCSTR);
 		~PEParser();

@@ -5,18 +5,19 @@ using namespace std;
 namespace PEParse {
 	PEParser::PEParser(LPCSTR filename) {
 		parse(filename);
-		tcout << "base: " << m_base << endl;
 
 		m_view.type = m_machineType;
 		m_view.header = &m_header;
 		m_view.body = &m_body;
-		m_view.base = (long long)m_base;
+		m_view.base = m_base;
 	}
 
 	PEParser::~PEParser() {
 		if (m_fileHandle != NULL) CloseHandle(m_fileHandle);
 		if (m_mapping != NULL) CloseHandle(m_mapping);
 		if (m_base != NULL) UnmapViewOfFile(m_base);
+		if (m_header.sectionHeader != NULL) delete m_header.sectionHeader;
+		if (m_body.section != NULL) delete m_body.section;
 	}
 
 	void PEParser::parse(LPCSTR filename) {
@@ -64,34 +65,28 @@ namespace PEParse {
 		auto ntHeader = m_header.ntHeader.x86;
 
 		WORD sizeOfOptionalHeader = ntHeader->FileHeader.SizeOfOptionalHeader;
-		DWORD sizeOfHeader = ntHeader->OptionalHeader.SizeOfHeaders;
-		int textSectionSize = ntHeader->OptionalHeader.SizeOfCode;
-
 		m_header.sectionCount = ntHeader->FileHeader.NumberOfSections;
-		BYTE* bodyStartPosition = (BYTE*)m_base;
 		BYTE* sectionStartPosition = ((BYTE*)&(ntHeader->OptionalHeader) + sizeOfOptionalHeader);
 
 		m_header.DataDirectory = ntHeader->OptionalHeader.DataDirectory;
 
-		parseSections(sectionStartPosition, bodyStartPosition);
+		parseSections(sectionStartPosition);
 	}
 	void PEParser::parse64() {
 		auto ntHeader = m_header.ntHeader.x64;
-
+		//아래 코드부터 parse32와 동일
 		WORD sizeOfOptionalHeader = ntHeader->FileHeader.SizeOfOptionalHeader;
-		DWORD sizeOfHeader = ntHeader->OptionalHeader.SizeOfHeaders;
-		int textSectionSize = ntHeader->OptionalHeader.SizeOfCode;
 
 		m_header.sectionCount = ntHeader->FileHeader.NumberOfSections;
-		BYTE* bodyStartPosition = (BYTE*)m_base;
 		BYTE* sectionStartPosition = ((BYTE*)&(ntHeader->OptionalHeader) + sizeOfOptionalHeader);
 
 		m_header.DataDirectory = ntHeader->OptionalHeader.DataDirectory;
 
-		parseSections(sectionStartPosition, bodyStartPosition);
+		parseSections(sectionStartPosition);
 	}
 
-	void PEParser::parseSections(BYTE* sectionStartPosition, BYTE* bodyStartPosition) {
+	void PEParser::parseSections(BYTE* sectionStartPosition) {
+		BYTE* base = (BYTE*)m_base;
 		BYTE* position = sectionStartPosition;
 		size_t count = m_header.sectionCount;
 
@@ -99,7 +94,7 @@ namespace PEParse {
 		BYTE** section = new BYTE*[count + 1];
 		for (size_t i = 0; i < count; i++) {
 			sectionHeader[i] = (IMAGE_SECTION_HEADER*)(position);
-			section[i] = (BYTE*)(bodyStartPosition + sectionHeader[i]->PointerToRawData);
+			section[i] = (BYTE*)(base + sectionHeader[i]->PointerToRawData);
 
 			position += sizeof(IMAGE_SECTION_HEADER);
 		}

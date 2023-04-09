@@ -4,23 +4,10 @@
 using namespace std;
 
 namespace PEParse {
-	void PEParser::showBuffer(BYTE* buffer, size_t size) {
-		for (size_t i = 0; i < size; i += 16) {
-			for (size_t j = i; j < size && j < i + 16; j++) {
-				printf("%02x ", buffer[j]);
-				if (j % 8 == 7) printf(" ");
-			}
-			for (size_t j = i; j < size && j < i + 16; j++) {
-				char ch = buffer[j];
-				if (isprint(ch)) tcout << ch << endl;
-				else tcout << "." << endl;
-			}
-
-			printf("\n");
-		}
-	}
 
 	void PEParser::show() {
+		showPosition();
+
 		if (m_machineType == x86) {
 			show32();
 		}
@@ -31,8 +18,6 @@ namespace PEParse {
 			tcout << "show() : nothing to show" << endl;
 			return;
 		}
-
-		showPosition();
 	}
 
 	LPVOID PEParser::getDiskPosition(LPVOID position) {

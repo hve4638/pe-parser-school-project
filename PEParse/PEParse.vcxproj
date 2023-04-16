@@ -129,13 +129,25 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="parseDataDirectory.cpp" />
-    <ClCompile Include="parsing.cpp" />
-    <ClCompile Include="showbuffer.cpp" />
-    <ClCompile Include="showing.cpp" />
+    <ClCompile Include="PEFileReader.cpp" />
+    <ClCompile Include="PEFileReaderPrivate.cpp" />
+    <ClCompile Include="PEParser.cpp" />
+    <ClCompile Include="PEParserPrivate.cpp" />
+    <ClCompile Include="PEPrinter.cpp" />
+    <ClCompile Include="PEProcessReader.cpp" />
+    <ClCompile Include="PEUtils.cpp" />
+    <ClCompile Include="ReserveDelete.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="peparser.h" />
+    <ClInclude Include="IPEParser.h" />
+    <ClInclude Include="PEProcessReader.h" />
+    <ClInclude Include="PEPrinter.h" />
+    <ClInclude Include="PEUtils.h" />
+    <ClInclude Include="PEFileReader.h" />
+    <ClInclude Include="IPEReader.h" />
+    <ClInclude Include="ReserveDelete.h" />
+    <ClInclude Include="typedef.h" />
+    <ClInclude Include="PEParser.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

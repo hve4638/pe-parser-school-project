@@ -14,6 +14,8 @@ using namespace std;
 #define OutputDebugStringT OutputDebugStringA
 #endif
 
+#define IMAGE_PDB_SIGNATURE 0x53445352 // "RSDS"
+
 #define MD5_LENGTH 16
 #define CHAR_IS_TCHAR (sizeof(TCHAR) == sizeof(char))
 typedef ULONGLONG QWORD;
@@ -53,10 +55,18 @@ enum MACHINE_TYPE {
     other,
 };
 
+typedef struct _IMAGE_PDB_INFO {
+    DWORD Signature;
+    BYTE Guid[16];
+    DWORD Age;
+    CHAR PdbFileName[1];
+} IMAGE_PDB_INFO;
+
 typedef struct _PEStructure {
     MACHINE_TYPE machineType;
     LPVOID baseAddress = NULL;
     tstring filePath;
+    tstring pdbPath;
     IMAGE_DOS_HEADER dosHeader = { 0, };
     IMAGE_NT_HEADERS32 ntHeader32 = { 0, };
     IMAGE_NT_HEADERS64 ntHeader64 = { 0, };

@@ -7,6 +7,6 @@ namespace PEParse {
         virtual ~IPEParser() {};
         virtual void close(void)abstract;
         virtual BOOL parsePE(DWORD pid, const TCHAR* pfilePath) abstract;
-        virtual const PEStructure& getPEStructure(void) abstract;
+        virtual shared_ptr<PEStructure> getPEStructure() abstract;
     };
 }

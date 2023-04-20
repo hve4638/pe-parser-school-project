@@ -2,15 +2,18 @@
 #include <format>
 #include "PEParser.h"
 #include "PEFileReader.h"
+#include "PEProcessReader.h"
 #include "PEUtils.h"
+#include "HashMD5Utils.h"
 
 using namespace std;
+using namespace PEUtils;
 //using namespace PEMemMapUtil;
 //using namespace PEProcessUtil;
 
 namespace PEParse {
     PEParser::PEParser() {
-
+        m_peStruct.reset(new PEStructure());
     }
 
     PEParser::~PEParser() {
@@ -18,14 +21,11 @@ namespace PEParse {
     }
 
     void PEParser::close() {
-        m_peStruct.machineType = other;
-        m_peStruct.sectionList.clear();
-        m_peStruct.exportList.clear();
-        m_peStruct.importList.clear();
-        m_peStruct.tlsCallbackList.clear();
-        if (m_peReader != NULL) {
-            PEUtils::deleteStruct((VOID**)&m_peReader);
-        }
+        m_peStruct->machineType = other;
+        m_peStruct->sectionList.clear();
+        m_peStruct->exportList.clear();
+        m_peStruct->importList.clear();
+        m_peStruct->tlsCallbackList.clear();
     };
 
     BOOL PEParser::parsePEFile(const TCHAR* filePath) {
@@ -37,14 +37,12 @@ namespace PEParse {
 
     BOOL PEParser::parsePE(DWORD pid, const TCHAR* pfilePath) {
         if (pfilePath == NULL) {
-            // WIP
-            return FALSE;
+            m_peReader.reset(new PEProcessReader());
         }
         else {
-            m_peReader = new PEFileReader();
+            m_peReader.reset(new PEFileReader());
         }
 
-        // PE(process or file) parsing
         if (m_peReader->open(pid, pfilePath)) {
             if (parseDosHeader() && parseNtHeader()) {
                 parseSectionHeader();
@@ -52,9 +50,10 @@ namespace PEParse {
                 parseEAT();
                 parseIAT();
                 parseTLS();
+                parseDebug();
 
-                m_peStruct.baseAddress = m_peReader->getBaseAddress();
-                m_peStruct.filePath = m_peReader->getFilePath();
+                m_peStruct->baseAddress = m_peReader->getBaseAddress();
+                m_peStruct->filePath = m_peReader->getFilePath();
                 return TRUE;
             }
             else {
@@ -67,7 +66,44 @@ namespace PEParse {
         }
     }
 
-    const PEStructure& PEParser::getPEStructure() {
+    shared_ptr<PEStructure> PEParser::getPEStructure() {
         return m_peStruct;
+    }
+
+    BOOL PEParser::tryGetSectionHash(const TCHAR* sectionName, tstring& hash) {
+        SectionInfo section;
+        if (findSectionAsName(sectionName, section)) {
+            DWORD va = section.VirtualAddress;
+            DWORD size = section.SizeOfRawData;
+            return tryMakeHashMD5(va, size, hash);
+        }
+        else {
+            return FALSE;
+        }
+    }
+
+    BOOL PEParser::tryGetEntryPointSectionHash(tstring& hash) {
+        SectionInfo section;
+
+        DWORD entryPoint = getAddressOfEntryPoint();
+        if (findSectionAsOffset(entryPoint, section)) {
+            DWORD va = section.VirtualAddress;
+            DWORD size = section.SizeOfRawData;
+            return tryMakeHashMD5(va, size, hash);
+        }
+        else {
+            return FALSE;
+        }
+    };
+
+    BOOL PEParser::tryGetPDBFilePathHash(tstring& hash) {
+        SectionInfo section;
+
+        tstring& pdbPath = m_peStruct->pdbPath;
+        auto bytes = reinterpret_cast<const BYTE*>(pdbPath.c_str());
+        auto length = (DWORD)(pdbPath.size());
+
+        HashMD5Utils md5;
+        return md5.tryGetMD5(bytes, length, hash);
     }
 }

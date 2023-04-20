@@ -60,7 +60,9 @@ namespace PEParse {
         for (DWORD i = 0; i < count; i++) {
             IMAGE_SECTION_HEADER& header = (m_sectionInfo.headerAddress[i]);
 
-            if ((rva > (ULONGLONG)header.VirtualAddress) && (rva < (ULONGLONG)((DWORD)header.VirtualAddress + (DWORD)header.SizeOfRawData))) {
+            QWORD rangeStart = header.VirtualAddress;
+            QWORD rangeEnd = rangeStart + header.SizeOfRawData;
+            if (rva >= rangeStart && rva < rangeEnd) {
                 m_rawInfo.startAddress = (ULONGLONG)header.VirtualAddress;
                 m_rawInfo.endAddress = (ULONGLONG)m_rawInfo.startAddress + header.SizeOfRawData;
                 m_rawInfo.virtualAddress = (ULONGLONG)header.VirtualAddress;

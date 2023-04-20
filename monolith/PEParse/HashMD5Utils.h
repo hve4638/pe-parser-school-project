@@ -1,16 +1,19 @@
-#include "IPEHashUtils.h"
+#include "IHashUtils.h"
 
 namespace PEUtils {
     class HashMD5Utils : public IHashUtils {
         HCRYPTPROV m_prov = NULL;
         HCRYPTHASH m_hash = NULL;
 
+        BOOL bytesToString(const BYTE* hashBytes, DWORD srcLength, tstring& outString);
     public:
         HashMD5Utils();
         ~HashMD5Utils();
-        IUse* use() override;
         BOOL open() override;
         BOOL close() override;
-        BOOL tryGetMD5(const BYTE* data, size_t len, BYTE* hash);
+        BOOL tryGetMD5ToBytes(const BYTE* data, size_t len, BYTE* hashBytes);
+        BOOL tryGetMD5ToString(const BYTE* data, size_t len, tstring& hashString);
+        BOOL tryGetMD5(const BYTE* data, size_t len, BYTE* hashBytes);
+        BOOL tryGetMD5(const BYTE* data, size_t len, tstring& hashString);
     };
 }

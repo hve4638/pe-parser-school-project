@@ -131,21 +131,25 @@
     <ClCompile Include="HashMD5Utils.cpp" />
     <ClCompile Include="HashMD5Utils.h" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="MD5HashUse.cpp" />
     <ClCompile Include="PEFileReader.cpp" />
     <ClCompile Include="PEFileReaderPrivate.cpp" />
     <ClCompile Include="PEParser.cpp" />
+    <ClCompile Include="PEParserParseMethod.cpp" />
     <ClCompile Include="PEParserPrivate.cpp" />
     <ClCompile Include="PEPrinter.cpp" />
+    <ClCompile Include="PEPrinterPrivate.cpp" />
     <ClCompile Include="PEProcessReader.cpp" />
     <ClCompile Include="PEProcessReaderPrivate.cpp" />
     <ClCompile Include="PEUtils.cpp" />
     <ClCompile Include="ReserveDelete.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="IPEHashUtils.h" />
+    <ClInclude Include="ICommandParser.h" />
+    <ClInclude Include="IHashUtils.h" />
+    <ClInclude Include="ILogUtils.h" />
     <ClInclude Include="IPEParser.h" />
-    <ClInclude Include="HashMD5Use.h" />
+    <ClInclude Include="LogDirection.h" />
+    <ClInclude Include="LogLevel.h" />
     <ClInclude Include="PEProcessReader.h" />
     <ClInclude Include="PEPrinter.h" />
     <ClInclude Include="PEUtils.h" />

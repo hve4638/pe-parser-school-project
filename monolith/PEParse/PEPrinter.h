@@ -3,19 +3,24 @@
 
 namespace PELog {
     class PEPrinter {
+        shared_ptr<PEStructure> m_wkPEStruct;
+
     private:
-        void printBaseAddress(const PEStructure& peStructure);
-        void printDosHeader(const PEStructure& peStructure);
-        void printNTHeader(const PEStructure& peStructure);
-        void printSectionHeader(const PEStructure& peStructure);
-        void printEAT(const PEStructure& peStructure);
-        void printIAT(const PEStructure& peStructure);
-        void printTLS(const PEStructure& peStructure);
+        void printBaseAddress();
+        void printDosHeader();
+        void printNTHeader();
+        void printSectionHeader();
+        void printEAT();
+        void printIAT();
+        void printTLS();
 
     public:
         PEPrinter();
+        PEPrinter(shared_ptr<PEStructure> peStructWeakPtr);
         ~PEPrinter();
-        void printPEStructure(const PEStructure& peStructure);
+        void reset(shared_ptr<PEStructure> peStructWeakPtr);
+
+        void printPEStructure();
     };
 };
 

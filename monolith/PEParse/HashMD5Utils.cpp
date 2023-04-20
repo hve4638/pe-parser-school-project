@@ -1,5 +1,5 @@
 #include "HashMD5Utils.h"
-#include "HashMD5Use.h"
+#include <format>
 
 namespace PEUtils {
 
@@ -32,19 +32,18 @@ namespace PEUtils {
         m_hash = NULL;
         return TRUE;
     }
-    IUse* HashMD5Utils::use() {
-        if (m_prov == NULL) {
-            return new HashMD5Use(this);
-        }
-        else {
-            return new HashMD5Use();
-        }
+
+    BOOL HashMD5Utils::tryGetMD5(const BYTE* data, size_t len, BYTE* outputBytes) {
+        return tryGetMD5ToBytes(data, len, outputBytes);
+    }
+    BOOL HashMD5Utils::tryGetMD5(const BYTE* data, size_t len, tstring& outputString) {
+        return tryGetMD5ToString(data, len, outputString);
     }
 
-    BOOL HashMD5Utils::tryGetMD5(const BYTE* data, size_t len, BYTE* hash) {
+    BOOL HashMD5Utils::tryGetMD5ToBytes(const BYTE* data, size_t len, BYTE* hash) {
         // 해시 결과 가져오기
         DWORD hashLen = 16;
-        if (!CryptHashData(m_hash, data, len, 0)) {
+        if (!CryptHashData(m_hash, data, (DWORD)len, 0)) {
             std::cerr << "Error: CryptHashData failed." << std::endl;
             return FALSE;
         }
@@ -55,6 +54,32 @@ namespace PEUtils {
         else {
             return TRUE;
         }
-
     }
+
+    BOOL HashMD5Utils::tryGetMD5ToString(const BYTE* data, size_t len, tstring& hash) {
+        BYTE buffer[MD5_LENGTH] = { 0, };
+        DWORD md5Length = MD5_LENGTH;
+
+        vector<BYTE> bytes(len);
+        if (!tryGetMD5ToBytes(data, len, buffer)) {
+            return FALSE;
+        }
+        else {
+            return bytesToString(buffer, md5Length, hash);
+        }
+    }
+
+    BOOL HashMD5Utils::bytesToString(const BYTE* hashBytes, DWORD srcLength, tstring& outString) {
+        outString = _T("");
+
+        if (hashBytes == NULL) {
+            return FALSE;
+        }
+        else {
+            for (DWORD i = 0; i < srcLength; i++) {
+                outString.append(format(_T("{:02x}"), hashBytes[i]));
+            }
+            return (!outString.empty());
+        }
+    };
 }

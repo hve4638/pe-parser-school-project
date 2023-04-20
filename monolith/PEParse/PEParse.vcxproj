@@ -128,10 +128,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="HashMD5Utils.cpp" />
+    <ClCompile Include="HashMD5Utils.h" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MD5HashUse.cpp" />
     <ClCompile Include="PEFileReader.cpp" />
     <ClCompile Include="PEFileReaderPrivate.cpp" />
-    <ClCompile Include="PEHashUtils.cpp" />
     <ClCompile Include="PEParser.cpp" />
     <ClCompile Include="PEParserPrivate.cpp" />
     <ClCompile Include="PEPrinter.cpp" />
@@ -143,7 +145,7 @@
   <ItemGroup>
     <ClInclude Include="IPEHashUtils.h" />
     <ClInclude Include="IPEParser.h" />
-    <ClInclude Include="PEHashUtils.h" />
+    <ClInclude Include="HashMD5Use.h" />
     <ClInclude Include="PEProcessReader.h" />
     <ClInclude Include="PEPrinter.h" />
     <ClInclude Include="PEUtils.h" />

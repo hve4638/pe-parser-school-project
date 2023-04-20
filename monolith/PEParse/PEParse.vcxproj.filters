@@ -45,7 +45,13 @@
     <ClCompile Include="PEProcessReaderPrivate.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="PEHashUtils.cpp">
+    <ClCompile Include="HashMD5Utils.h">
+      <Filter>헤더 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="HashMD5Utils.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="MD5HashUse.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -80,7 +86,7 @@
     <ClInclude Include="IPEHashUtils.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="PEHashUtils.h">
+    <ClInclude Include="HashMD5Use.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

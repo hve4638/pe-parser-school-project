@@ -14,10 +14,11 @@ using namespace std;
 #define OutputDebugStringT OutputDebugStringA
 #endif
 
+#define MD5_LENGTH 16
+#define CHAR_IS_TCHAR (sizeof(TCHAR) == sizeof(char))
 typedef ULONGLONG QWORD;
 typedef ULONGLONG PEPOS;
 typedef basic_string<TCHAR> tstring;
-//typedef vector<tuple<ULONGLONG, tstring>> LoadedDllsInfo;
 
 typedef struct _LoadedDllInfo {
     tstring Path;
@@ -36,7 +37,7 @@ typedef struct _PEFunctionInfo {
     QWORD AddressOfIAT;
     DWORD Ordinal;
     tstring Name;
-} PEFunctionInfo, PEImportFunctionInfo;
+} PEFunctionInfo;
 
 typedef struct _PEExportImportInfo {
     tstring Name;
@@ -45,7 +46,6 @@ typedef struct _PEExportImportInfo {
 
 typedef vector<SectionInfo> SectionsInfo;
 typedef vector<LoadedDllInfo> LoadedDllsInfo;
-typedef vector<PEExportImportInfo> PEExportImportsInfo;
 
 enum MACHINE_TYPE {
     x64,
@@ -53,8 +53,7 @@ enum MACHINE_TYPE {
     other,
 };
 
-typedef struct _PEStructure
-{
+typedef struct _PEStructure {
     MACHINE_TYPE machineType;
     LPVOID baseAddress = NULL;
     tstring filePath;
@@ -63,7 +62,7 @@ typedef struct _PEStructure
     IMAGE_NT_HEADERS64 ntHeader64 = { 0, };
     IMAGE_DATA_DIRECTORY dataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES] = { 0, };
     SectionsInfo sectionList;
-    vector<PEExportImportInfo> importList;
-    vector<PEExportImportInfo> exportList;
+    vector<PEImportInfo> importList;
+    vector<PEExportInfo> exportList;
     vector<QWORD> tlsCallbackList;
 } PEStructure;

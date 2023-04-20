@@ -131,6 +131,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PEFileReader.cpp" />
     <ClCompile Include="PEFileReaderPrivate.cpp" />
+    <ClCompile Include="PEHashUtils.cpp" />
     <ClCompile Include="PEParser.cpp" />
     <ClCompile Include="PEParserPrivate.cpp" />
     <ClCompile Include="PEPrinter.cpp" />
@@ -140,7 +141,9 @@
     <ClCompile Include="ReserveDelete.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="IPEHashUtils.h" />
     <ClInclude Include="IPEParser.h" />
+    <ClInclude Include="PEHashUtils.h" />
     <ClInclude Include="PEProcessReader.h" />
     <ClInclude Include="PEPrinter.h" />
     <ClInclude Include="PEUtils.h" />

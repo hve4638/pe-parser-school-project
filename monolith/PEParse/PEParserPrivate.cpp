@@ -9,10 +9,16 @@ using namespace std;
 using namespace PEUtils;
 
 namespace PEParse {
-    tstring PEParser::getString(const char* srcString, size_t srcLength) {
-        tstring t;
-        return t;
-        //WIP;
+    tstring PEParser::getString(const char* srcString, size_t srcLength = IMAGE_SIZEOF_SHORT_NAME) {
+        shared_ptr<BYTE> byteBuffer(new BYTE[srcLength + 1]);
+        memcpy_s(byteBuffer.get(), srcLength, srcString, srcLength);
+        
+        if (CHAR_IS_TCHAR) {
+            return reinterpret_cast<const TCHAR*>(byteBuffer.get());
+        }
+        else {
+            return convertToUTF8(byteBuffer.get(), srcLength);
+        }
     }
 
     BOOL PEParser::parseDosHeader(void) {

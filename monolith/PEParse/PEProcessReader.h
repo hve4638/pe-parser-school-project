@@ -7,7 +7,6 @@ namespace PEParse {
         OUT PVOID ProcessInformation, IN ULONG ProcessInformationLength, OUT PULONG ReturnLength OPTIONAL);
 
     class PEProcessReader : public IPEReader {
-
     private:
         DWORD m_processId = NULL;
         HANDLE m_processHandle = NULL;
@@ -17,7 +16,6 @@ namespace PEParse {
         pNtQueryInformationProcess m_pNtQueryInformationProcess = NULL;
 
     private:
-        void debug(tstring debugMessage);
         BOOL parseImageBaseAddress(void);
 
     public:

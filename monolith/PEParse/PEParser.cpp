@@ -17,7 +17,7 @@ namespace PEParse {
         close();
     }
 
-    void PEParser::close(void) {
+    void PEParser::close() {
         m_peStruct.machineType = other;
         m_peStruct.sectionList.clear();
         m_peStruct.exportList.clear();
@@ -67,7 +67,7 @@ namespace PEParse {
         }
     }
 
-    const PEStructure& PEParser::getPEStructure(void) {
+    const PEStructure& PEParser::getPEStructure() {
         return m_peStruct;
     }
 }

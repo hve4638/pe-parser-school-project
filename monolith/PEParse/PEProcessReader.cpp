@@ -20,16 +20,11 @@ namespace PEParse {
         }
     };
 
-    PEProcessReader::~PEProcessReader(void) {
+    PEProcessReader::~PEProcessReader() {
         close();
     };
 
-    void PEProcessReader::debug(tstring debugMessage) {
-        OutputDebugStringT(debugMessage.c_str());
-        OutputDebugStringT(_T("\n"));
-    };
-
-    void PEProcessReader::close(void) {
+    void PEProcessReader::close() {
         m_processId = NULL;
         m_peBaseAddress = NULL;
         memset(&m_peb, 0, sizeof(PEB));
@@ -52,11 +47,11 @@ namespace PEParse {
                 else {
                     // Image Base Address를 얻지 못한 경우 실패로 처리(변수 초기화)
                     close();
-                    debug(_T("Open process fail : get image base address fail"));
+                    debugPrint(_T("Open process fail : get image base address fail"));
                 }
             }
             else {
-                debug(format(_T("Open process fail : 0x{:x}"), (DWORD)GetLastError()));
+                debugPrint(format(_T("Open process fail : 0x{:x}"), (DWORD)GetLastError()));
             }
         }
         return result;
@@ -70,8 +65,6 @@ namespace PEParse {
         return m_peFilePath;
     };
 
-    // PE 분석 과정에서 저장된 문자열을 읽어들이는 함수
-    // 프로세스 메모리를 읽어야 하는데 문자열의 크기를 알 수 없기 때문에 1바이트 씩 읽음
     tstring PEProcessReader::getPEString(ULONGLONG rva) {
         SIZE_T readLength = 0;
         BYTE byteChar[2] = { 0, };
@@ -83,7 +76,8 @@ namespace PEParse {
                 src.append((char*)byteChar);
                 curOffset++;
             }
-        } while (byteChar[0] != 0x0);
+        } while (byteChar[0] != '\0');
+
         return (tstring().assign(src.begin(), src.end()));
     };
 
@@ -203,7 +197,7 @@ namespace PEParse {
                             // 맨 처음 항목이 프로세스 자신
                             if (ReadProcessMemory(m_processHandle, ldrDataTable.FullDllName.Buffer, dllNameBuffer, ldrDataTable.FullDllName.Length, &readData)) {
                                 //copyStringToTString();
-                                if (sizeof(TCHAR) == sizeof(char)) {
+                                if (CHAR_IS_TCHAR) {
                                     wstring modulePath = (PWSTR)dllNameBuffer;
                                     dllPath.assign(modulePath.begin(), modulePath.end());
                                 }

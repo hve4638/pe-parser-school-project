@@ -10,8 +10,7 @@ using namespace PEUtils;
 
 namespace PEParse {
 
-    BOOL PEProcessReader::parseImageBaseAddress(void)
-    {
+    BOOL PEProcessReader::parseImageBaseAddress() {
         BOOL result = FALSE;
         NTSTATUS status = 0;
         HANDLE procHeap = NULL;
@@ -59,7 +58,7 @@ namespace PEParse {
                                 if ((ULONGLONG)ldrDataTable.DllBase != 0x0) {
                                     // 맨 처음 항목이 프로세스 자신
                                     if (ReadProcessMemory(m_processHandle, ldrDataTable.FullDllName.Buffer, moduleNameBuffer, ldrDataTable.FullDllName.Length, &readData)) {
-                                        if (sizeof(TCHAR) == sizeof(char)) {
+                                        if (CHAR_IS_TCHAR) {
                                             wstring modulePath = (PWSTR)moduleNameBuffer;
                                             m_peFilePath.assign(modulePath.begin(), modulePath.end());
                                         }

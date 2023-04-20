@@ -10,7 +10,7 @@ namespace PEUtils {
     }
 
     void copyStringToTString(LPVOID& src, tstring& dst) {
-        if (sizeof(TCHAR) == sizeof(char)) {
+        if (CHAR_IS_TCHAR) {
             dst = reinterpret_cast<TCHAR*>(src);
         }
         else {
@@ -36,11 +36,21 @@ namespace PEUtils {
         }
     }
 
-    void deleteStruct(void** pStruct)
-    {
+    void deleteStruct(void** pStruct) {
         if ((*pStruct) != NULL) {
             delete (*pStruct);
             (*pStruct) = NULL;
         }
     };
+
+    tstring convertToUTF8(BYTE* byteBuffer, size_t srcLength) {
+        tstring readString;
+        shared_ptr<TCHAR> byteBufferW(new TCHAR[srcLength + 1]);
+
+        int bufferLen = MultiByteToWideChar(CP_UTF8, 0, reinterpret_cast<LPCCH>(byteBuffer), -1, NULL, 0);
+        MultiByteToWideChar(CP_UTF8, 0, reinterpret_cast<LPCCH>(byteBuffer), -1, byteBufferW.get(), bufferLen);
+        readString = byteBufferW.get();
+
+        return readString;
+    }
 }

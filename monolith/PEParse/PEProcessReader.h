@@ -29,6 +29,7 @@ namespace PEParse {
         SSIZE_T readDataNoBase(PEPOS rva, LPVOID bufferAddress, SIZE_T bufferSize) override;
         LPVOID getBaseAddress() override;
         tstring getFilePath() override;
+        QWORD getRAW(QWORD rva) override;
 
     public:
         BOOL open(DWORD pid);

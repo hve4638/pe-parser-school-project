@@ -8,15 +8,15 @@ namespace PELog {
     static auto println = []() { tcout << std::endl << _T("---------------------------------------------------------------------------------") << std::endl; };
 
     PEPrinter::PEPrinter() {
-        m_wkPEStruct.reset();
+        m_PEStructure.reset();
     };
     PEPrinter::PEPrinter(shared_ptr<PEStructure> peStructWeakPtr) {
-        m_wkPEStruct = peStructWeakPtr;
+        m_PEStructure = peStructWeakPtr;
     };
     PEPrinter::~PEPrinter() { };
 
     void PEPrinter::reset(shared_ptr<PEStructure> peStructWeakPtr) {
-        m_wkPEStruct = peStructWeakPtr;
+        m_PEStructure = peStructWeakPtr;
     }
 
     void PEPrinter::printPEStructure() {

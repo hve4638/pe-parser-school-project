@@ -45,10 +45,12 @@ namespace PEParse {
 
     BOOL PEParser::findSectionAsOffset(DWORD offset, SectionInfo &sectionInfo) {
         for (SectionInfo section : m_peStruct->sectionList) {
-            DWORD offsetBegin = section.PointerToRawData;
+            DWORD offsetBegin = section.VirtualAddress;
             DWORD offsetEnd = offsetBegin + section.SizeOfRawData;
+
             if (offset >= offsetBegin && offset < offsetEnd) {
                 sectionInfo = section;
+
                 return TRUE;
             }
         }

@@ -13,36 +13,24 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="소스 파일\PEReader">
+      <UniqueIdentifier>{39763445-c707-4001-a8ce-c145b9d0bb6d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\PEParser">
+      <UniqueIdentifier>{60445d27-d8de-4f3d-859e-7434b20b68ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\PEPrinter">
+      <UniqueIdentifier>{db813b67-a1de-4939-9fd3-9004ddd54ee1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="PEFileReader.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="PEUtils.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="PEParser.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="PEParserPrivate.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="PEFileReaderPrivate.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="PEPrinter.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="ReserveDelete.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="PEProcessReader.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="PEProcessReaderPrivate.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="HashMD5Utils.h">
@@ -51,8 +39,32 @@
     <ClCompile Include="HashMD5Utils.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="MD5HashUse.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="PEFileReader.cpp">
+      <Filter>소스 파일\PEReader</Filter>
+    </ClCompile>
+    <ClCompile Include="PEFileReaderPrivate.cpp">
+      <Filter>소스 파일\PEReader</Filter>
+    </ClCompile>
+    <ClCompile Include="PEProcessReader.cpp">
+      <Filter>소스 파일\PEReader</Filter>
+    </ClCompile>
+    <ClCompile Include="PEProcessReaderPrivate.cpp">
+      <Filter>소스 파일\PEReader</Filter>
+    </ClCompile>
+    <ClCompile Include="PEParserPrivate.cpp">
+      <Filter>소스 파일\PEParser</Filter>
+    </ClCompile>
+    <ClCompile Include="PEParserParseMethod.cpp">
+      <Filter>소스 파일\PEParser</Filter>
+    </ClCompile>
+    <ClCompile Include="PEParser.cpp">
+      <Filter>소스 파일\PEParser</Filter>
+    </ClCompile>
+    <ClCompile Include="PEPrinter.cpp">
+      <Filter>소스 파일\PEPrinter</Filter>
+    </ClCompile>
+    <ClCompile Include="PEPrinterPrivate.cpp">
+      <Filter>소스 파일\PEPrinter</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -83,10 +95,19 @@
     <ClInclude Include="PEProcessReader.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="IPEHashUtils.h">
+    <ClInclude Include="ICommandParser.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="HashMD5Use.h">
+    <ClInclude Include="IHashUtils.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ILogUtils.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="LogDirection.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="LogLevel.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

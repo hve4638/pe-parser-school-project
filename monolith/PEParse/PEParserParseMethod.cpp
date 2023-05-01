@@ -8,46 +8,56 @@
 using namespace std;
 using namespace PEUtils;
 
-namespace PEParse {    BOOL PEParser::parseDosHeader(void) {
-        if (m_peReader->readData(0x0, &m_peStruct->dosHeader, sizeof(IMAGE_DOS_HEADER)) >= 0) {
-            if (m_peStruct->dosHeader.e_magic == IMAGE_DOS_SIGNATURE) {
-                return TRUE;
-            }
-            else {
-                debugPrint(_T("Error: Invalid DOS header signature\n"));
-            }
+namespace PEParse {
+    BOOL PEParser::parseDosHeader() {
+        if (m_peReader->readData(0x0, &m_peStruct->dosHeader, sizeof(IMAGE_DOS_HEADER)) < 0) {
+            debugPrint(_T("Error: Fail to read DOS header\n"));
+            return FALSE;
+        }
+        else if (m_peStruct->dosHeader.e_magic != IMAGE_DOS_SIGNATURE) {
+            debugPrint(_T("Error: Invalid DOS header signature\n"));
+            return FALSE;
         }
         else {
-            debugPrint(_T("Error: Fail to read DOS header\n"));
+            return TRUE;
         }
-
-        return FALSE;
     }
-    BOOL PEParser::parseNtHeader(void) {
+
+    BOOL PEParser::parseNtHeader() {
         PEPOS pNtHeader = m_peStruct->dosHeader.e_lfanew;
         IMAGE_NT_HEADERS32 ntHeader = { 0, };
-        if (m_peReader->readData(pNtHeader, &ntHeader, sizeof(IMAGE_NT_HEADERS32)) >= 0) {
-            if (ntHeader.Signature != IMAGE_NT_SIGNATURE) {
-                debugPrint(_T("Error: Invalid NT header signature\n"));
+        if (m_peReader->readData(pNtHeader, &ntHeader, sizeof(IMAGE_NT_HEADERS32)) < 0) {
+            debugPrint(_T("Error: Fail to read DOS header\n"));
+            return FALSE;
+        }
+        else if (ntHeader.Signature != IMAGE_NT_SIGNATURE) {
+            debugPrint(_T("Error: Invalid NT header signature\n"));
+            return FALSE;
+        }
+        else {
+            LPVOID bufferAddress;
+            SIZE_T bufferSize;
+            WORD machineType = ntHeader.FileHeader.Machine;
+
+            if ((WORD)machineType == IMAGE_FILE_MACHINE_I386) {
+                m_peStruct->machineType = x86;
+                bufferAddress = &m_peStruct->ntHeader32;
+                bufferSize = sizeof(IMAGE_NT_HEADERS32);
             }
             else {
-                WORD machineType = ntHeader.FileHeader.Machine;
-                if ((WORD)machineType == IMAGE_FILE_MACHINE_I386) {
-                    m_peStruct->machineType = x86;
-                    return (m_peReader->readData(pNtHeader, &m_peStruct->ntHeader32, sizeof(IMAGE_NT_HEADERS32)) >= 0);
-                }
-                else {
-                    m_peStruct->machineType = x64;
-                    return (m_peReader->readData(pNtHeader, &m_peStruct->ntHeader64, sizeof(IMAGE_NT_HEADERS64)) >= 0);
-                }
+                m_peStruct->machineType = x64;
+                bufferAddress = &m_peStruct->ntHeader64;
+                bufferSize = sizeof(IMAGE_NT_HEADERS64);
             }
+
+            return (m_peReader->readData(pNtHeader, bufferAddress, bufferSize) >= 0);
         }
-        return FALSE;
     }
-    BOOL PEParser::parseSectionHeader(void) {
+
+    BOOL PEParser::parseSectionHeader() {
         size_t sectionHeaderOffset;
         WORD numberOfSections;
-
+        
         if (m_peStruct->machineType == x86) {
             sectionHeaderOffset = m_peStruct->dosHeader.e_lfanew + sizeof(IMAGE_NT_HEADERS32);
             numberOfSections = m_peStruct->ntHeader32.FileHeader.NumberOfSections;
@@ -55,7 +65,10 @@ namespace PEParse {    BOOL PEParser::parseDosHeader(void) {
         else {
             sectionHeaderOffset = m_peStruct->dosHeader.e_lfanew + sizeof(IMAGE_NT_HEADERS64);
             numberOfSections = m_peStruct->ntHeader64.FileHeader.NumberOfSections;
+
         }
+
+        
 
         SIZE_T count;
         count = updateSectionHeaders(sectionHeaderOffset, numberOfSections);
@@ -86,33 +99,26 @@ namespace PEParse {    BOOL PEParser::parseDosHeader(void) {
     }
     BOOL PEParser::parseDataDirectory() {
         size_t dataSize = sizeof(IMAGE_DATA_DIRECTORY) * IMAGE_NUMBEROF_DIRECTORY_ENTRIES;
+        IMAGE_DATA_DIRECTORY *dataDirectory;
         if (m_peStruct->machineType == x86) {
-            auto dataDirectory = m_peStruct->ntHeader32.OptionalHeader.DataDirectory;
-            memcpy_s(&m_peStruct->dataDirectory, dataSize, dataDirectory, dataSize);
+            dataDirectory = m_peStruct->ntHeader32.OptionalHeader.DataDirectory;
         }
         else {
-            auto dataDirectory = m_peStruct->ntHeader64.OptionalHeader.DataDirectory;
-            memcpy_s(&m_peStruct->dataDirectory, dataSize, dataDirectory, dataSize);
+            dataDirectory = m_peStruct->ntHeader64.OptionalHeader.DataDirectory;
         }
+
+        memcpy_s(&m_peStruct->dataDirectory, dataSize, dataDirectory, dataSize);
         return TRUE;
     }
     BOOL PEParser::parseEAT() {
         ReserveDelete reserveDelete;
         vector<PEFunctionInfo> funcInfoVector;
         IMAGE_EXPORT_DIRECTORY exportDirectory = { 0, };
-
-        WORD* pNameOrdinal = NULL;
-        DWORD* pNameAddress = NULL;
-        DWORD* pFuncAddress = NULL;
-        DWORD* pFunctionList = NULL;
-
-        reserveDelete
-            .addRef((void**)&pNameOrdinal)
-            .addRef((void**)&pNameAddress)
-            .addRef((void**)&pFuncAddress)
-            .addRef((void**)&pFunctionList);
-
-        auto va = m_peStruct->dataDirectory[0].VirtualAddress;
+        WORD* nameOrdinals = NULL;
+        DWORD* nameAddresses = NULL;
+        DWORD* functionAddresses = NULL;
+        DWORD* functionNamesRVA = NULL;
+        DWORD va = m_peStruct->dataDirectory[0].VirtualAddress;
         if (va == 0x0) {
             return FALSE;
         }
@@ -120,48 +126,61 @@ namespace PEParse {    BOOL PEParser::parseDosHeader(void) {
             return FALSE;
         }
 
-        pNameOrdinal = new WORD[exportDirectory.NumberOfNames];
-        pNameAddress = new DWORD[exportDirectory.NumberOfNames];
-        pFuncAddress = new DWORD[exportDirectory.NumberOfFunctions];
+        reserveDelete
+            .addRef((void**)&nameOrdinals)
+            .addRef((void**)&nameAddresses)
+            .addRef((void**)&functionAddresses)
+            .addRef((void**)&functionNamesRVA);
 
-        tstring moduleName = m_peReader->getPEString(exportDirectory.Name);     // Export Directory Name : 함수를 제공하는 exe나 dll의 이름
-        DWORD odinalBase = (DWORD)exportDirectory.Base;                         // Ordinal 은 function address index + Base 값
+        nameOrdinals = new WORD[exportDirectory.NumberOfNames];
+        nameAddresses = new DWORD[exportDirectory.NumberOfNames];
+        functionAddresses = new DWORD[exportDirectory.NumberOfFunctions];
 
-        pFunctionList = new DWORD[exportDirectory.NumberOfFunctions];                   // 전체 함수 주소 배열에서 함수 이름이 존재하는 함수를 체크하기 위한 배열 생성
-        memset(pFunctionList, 0, sizeof(DWORD) * exportDirectory.NumberOfFunctions);    // 함수 이름이 존재하는 함수 주소의 위치에 이름 문자열의 RVA를 배열에 저장
 
-        if (tryReadExportDirectoryInfo(exportDirectory, pFuncAddress, pNameAddress, pNameOrdinal)) {
-            for (DWORD i = 0; i < exportDirectory.NumberOfNames; i++) {             // 이름이 존재하는 함수들의 이름 RVA를 pFunctionList에 저장
-                WORD index = pNameOrdinal[i];
-                DWORD nameRva = pNameAddress[i];
-                pFunctionList[index] = nameRva;
+        // 전체 함수 주소 배열에서 함수 이름이 존재하는 함수를 체크하기 위한 배열 생성
+        // 함수 이름이 존재하는 함수 주소의 위치에 이름 문자열의 RVA를 배열에 저장
+        functionNamesRVA = new DWORD[exportDirectory.NumberOfFunctions];
+        memset(functionNamesRVA, NULL, sizeof(DWORD) * exportDirectory.NumberOfFunctions);
+
+        if (tryReadExportDirectoryInfo(exportDirectory, functionAddresses, nameAddresses, nameOrdinals)) {
+            // 이름이 존재하는 함수들의 이름 RVA를 pFunctionList에 저장
+            for (DWORD i = 0; i < exportDirectory.NumberOfNames; i++) {
+                WORD index = nameOrdinals[i];
+                functionNamesRVA[index] = nameAddresses[i];
             }
 
+            DWORD ordinalBase = (DWORD)exportDirectory.Base;
             PEFunctionInfo funcInfo = { 0, };
-            for (DWORD i = 0; i < exportDirectory.NumberOfFunctions; i++) { // Export하는 전체 함수들에 대한 정보를 출력
-                if (pFunctionList[i] == 0x0) {
-                    if ((DWORD)pFuncAddress[i] != 0x0) { // Ordinal로만 Export하는 함수
-                        funcInfo.AddressOfIAT = pFuncAddress[i];
-                        funcInfo.Ordinal = odinalBase + i;
-                        funcInfo.Name = tstring(_T(""));
+            // Export하는 전체 함수들에 대한 정보를 출력
+            for (DWORD i = 0; i < exportDirectory.NumberOfFunctions; i++) {
+                DWORD nameRVA = functionNamesRVA[i];             // 이름이 존재하는 함수
+                DWORD addressOfIAT = functionAddresses[i];   // Ordinal로만 Export하는 함수
+                DWORD ordinal = ordinalBase + i;             // ordinal = Base + functionAddress index(nameOrdinal)
 
-                        funcInfoVector.push_back(funcInfo);
-                    }
-                    else {
-                        debugPrint(format(_T("Export address is invalid > 0x{:x}, 0x{:x}"), (DWORD)pFuncAddress[i], (WORD)odinalBase + i));
-                    }
+                if (nameRVA != NULL && addressOfIAT != NULL) {
+                    debugPrint(format(_T("Export address is invalid > 0x{:x}, 0x{:x}"), addressOfIAT, ordinal));
                 }
                 else {
-                    funcInfo.AddressOfIAT = pFuncAddress[i];
-                    funcInfo.Ordinal = odinalBase + i;
-                    funcInfo.Name = m_peReader->getPEString(pFunctionList[i]);
+                    funcInfo.AddressOfIAT = addressOfIAT;
+                    funcInfo.Ordinal = ordinal;
+
+                    if (nameRVA == NULL) {
+                        funcInfo.Name = tstring(_T(""));
+                    }
+                    else {
+                        funcInfo.Name = m_peReader->getPEString(nameRVA);
+                    }
 
                     funcInfoVector.push_back(funcInfo);
                 }
             }
-
-            if (!funcInfoVector.empty()) {
+            
+            if (funcInfoVector.empty()) {
+                return FALSE;
+            }
+            else {
                 PEExportInfo exportInfo;
+                tstring moduleName = m_peReader->getPEString(exportDirectory.Name);
                 exportInfo.Name = moduleName;
                 exportInfo.FunctionInfo = funcInfoVector;
 
@@ -169,16 +188,13 @@ namespace PEParse {    BOOL PEParser::parseDosHeader(void) {
 
                 return TRUE;
             }
-            else {
-                return FALSE;
-            }
         }
         else {
             return FALSE;
         }
     }
 
-    inline BOOL PEParser::tryReadExportDirectoryInfo(IMAGE_EXPORT_DIRECTORY exportDirectory, DWORD* pFuncAddress, DWORD* pNameAddress, WORD* pNameOrdinal) {
+    BOOL PEParser::tryReadExportDirectoryInfo(IMAGE_EXPORT_DIRECTORY exportDirectory, DWORD* pFuncAddress, DWORD* pNameAddress, WORD* pNameOrdinal) {
         if (m_peReader->readData(exportDirectory.AddressOfFunctions, pFuncAddress, sizeof(DWORD) * exportDirectory.NumberOfFunctions) < 0) return FALSE;
         if (m_peReader->readData(exportDirectory.AddressOfNames, pNameAddress, sizeof(DWORD) * exportDirectory.NumberOfNames) < 0) return FALSE;
         if (m_peReader->readData(exportDirectory.AddressOfNameOrdinals, pNameOrdinal, sizeof(WORD) * exportDirectory.NumberOfNames) < 0) return FALSE;
@@ -196,12 +212,12 @@ namespace PEParse {    BOOL PEParser::parseDosHeader(void) {
         else {
             while (m_peReader->readData(va, &importDescriptor, sizeof(IMAGE_IMPORT_DESCRIPTOR)) >= 0 && (importDescriptor.OriginalFirstThunk != 0x0)) {
                 if (m_peStruct->machineType == x86) {
-                    if (parseIAT32(importDescriptor)) {
+                    if (parseImportDescriptor32(importDescriptor)) {
                         result = TRUE;
                     }
                 }
                 else {
-                    if (parseIAT64(importDescriptor)) {
+                    if (parseImportDescriptor64(importDescriptor)) {
                         result = TRUE;
                     }
                 }
@@ -212,8 +228,8 @@ namespace PEParse {    BOOL PEParser::parseDosHeader(void) {
 
         return result;
     }
-
-    BOOL PEParser::parseIAT32(IMAGE_IMPORT_DESCRIPTOR& importDescriptor) {
+    
+    BOOL PEParser::parseImportDescriptor32(IMAGE_IMPORT_DESCRIPTOR& importDescriptor) {
         const ULONGLONG TRUNK_DATASIZE = sizeof(IMAGE_THUNK_DATA32);
         IMAGE_THUNK_DATA32 thunkData = { 0, };
 
@@ -226,7 +242,7 @@ namespace PEParse {    BOOL PEParser::parseDosHeader(void) {
             DWORD addressOfIAT = thunkData.u1.AddressOfData;
 
             if (m_peReader->readData((DWORD)importNameTablePosition, &thunkData, TRUNK_DATASIZE) >= 0) {
-                DWORD ordinalValue = (thunkData.u1.Ordinal << 1) >> 1; // 최상위 비트를 없앰(최상위 비트를 제거한 값이 Ordinal 값)
+                DWORD ordinalValue = (thunkData.u1.Ordinal << 1) >> 1; // 최상위 비트 제거
 
                 // 원래 값과 비교해서 다르면 최상위 비트가 1로 설정 됐다는 의미
                 // 최상위 비트가 1로 설정된 경우에는 Ordinal만 있는 함수
@@ -238,19 +254,14 @@ namespace PEParse {    BOOL PEParser::parseDosHeader(void) {
 
                     funcInfoVector.push_back(funcInfo);
                 }
-                else {
-                    // Hint(Ordinal)와 함수 이름 읽기
-                    // IMAGE_IMPORT_BY_NAME 구조체를 통하지 않는 이유는 실제 프로세스 메모리에서 데이터를 읽어야 하는데 IMAGE_IMPORT_BY_NAME 구조체가 Hint(WORD), Name(Char[1])으로만
-                    // 정의되어 있어서 3Byte만 읽을 뿐 전체 함수 이름을 다 읽어 올 수 없는 문제가 있음(함수 이름의 크기를 알수 없기 때문에)
-                    // 그래서 thunkData.u1.AddressOfData 주소를 통해서 Hint를 읽고 WORD 크기 만큼 주소를 증가 시켜서 getString 함수로 함수 이름을 읽도록 함
-                    if (m_peReader->readData(thunkData.u1.AddressOfData, &funcNameOrdinal, sizeof(WORD)) >= 0) {
-                        PEFunctionInfo funcInfo;
-                        funcInfo.AddressOfIAT = addressOfIAT;
-                        funcInfo.Ordinal = funcNameOrdinal;
-                        funcInfo.Name = m_peReader->getPEString((DWORD)(thunkData.u1.AddressOfData + sizeof(WORD)));
+                // Hint(Ordinal)와 함수 이름 읽기
+                else if (m_peReader->readData(thunkData.u1.AddressOfData, &funcNameOrdinal, sizeof(WORD)) >= 0) {
+                    PEFunctionInfo funcInfo;
+                    funcInfo.AddressOfIAT = addressOfIAT;
+                    funcInfo.Ordinal = funcNameOrdinal;
+                    funcInfo.Name = m_peReader->getPEString((DWORD)(thunkData.u1.AddressOfData + sizeof(WORD)));
 
-                        funcInfoVector.push_back(funcInfo);
-                    }
+                    funcInfoVector.push_back(funcInfo);
                 }
             }
             firstThunkAddress += TRUNK_DATASIZE;
@@ -270,7 +281,7 @@ namespace PEParse {    BOOL PEParser::parseDosHeader(void) {
         }
     }
 
-    BOOL PEParser::parseIAT64(IMAGE_IMPORT_DESCRIPTOR& importDescriptor) {
+    BOOL PEParser::parseImportDescriptor64(IMAGE_IMPORT_DESCRIPTOR& importDescriptor) {
         const ULONGLONG TRUNK_DATASIZE = sizeof(IMAGE_THUNK_DATA64);
         IMAGE_THUNK_DATA64 thunkData = { 0, };
 
@@ -344,12 +355,12 @@ namespace PEParse {    BOOL PEParser::parseDosHeader(void) {
 
             // 프로세스에서는 IMAGE_TLS_DIRECTORY32 구조체 내의 값들이 RVA가 아닌 실제 주소(VA)로 저장되어 있기 때문에 m_peBaseAddress를 더해주지 않고 메모리 주소 그대로 읽음
             while ((m_peReader->readDataNoBase((DWORD)curCallbackArrayAddress, &callbackAddress, sizeof(DWORD)) >= 0) && (callbackAddress != 0x0)) {
-                m_peStruct->tlsCallbackList.push_back((ULONGLONG)callbackAddress);
+                m_peStruct->tlsCallbackList.push_back((QWORD)callbackAddress);
                 curCallbackArrayAddress += sizeof(DWORD);
             }
 
+            // 파일에서는 콜백 함수 주소 배열을 얻을 수 없기 때문에 구조체에 저장된 주소를 그대로 저장
             if (m_peStruct->tlsCallbackList.size() == 0) {
-                // 파일에서는 콜백 함수 주소 배열을 얻을 수 없기 때문에 구조체에 저장된 주소를 그대로 저장
                 m_peStruct->tlsCallbackList.push_back((DWORD)tlsDirectory.AddressOfCallBacks);
             }
             return TRUE;

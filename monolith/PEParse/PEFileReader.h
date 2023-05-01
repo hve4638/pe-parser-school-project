@@ -38,6 +38,7 @@ namespace PEParse {
         BOOL open(DWORD pid, const TCHAR* pfilePath) override;
         void close() override;
         LPVOID getBaseAddress() override;
+        QWORD getRAW(QWORD rva) override;
         tstring getFilePath() override;
         tstring getPEString(PEPOS rva) override;
         tstring getPEStringNoBase(PEPOS rva) override;

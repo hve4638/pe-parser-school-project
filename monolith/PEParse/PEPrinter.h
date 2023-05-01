@@ -3,7 +3,7 @@
 
 namespace PELog {
     class PEPrinter {
-        shared_ptr<PEStructure> m_wkPEStruct;
+        shared_ptr<PEStructure> m_PEStructure;
 
     private:
         void printBaseAddress();

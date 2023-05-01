@@ -13,5 +13,6 @@ public:
     virtual tstring getPEStringNoBase(ULONGLONG rva) abstract;
     virtual SSIZE_T readData(PEPOS rva, LPVOID bufferAddress, SIZE_T bufferSize) abstract;
     virtual SSIZE_T readDataNoBase(PEPOS rva, LPVOID bufferAddress, SIZE_T bufferSize) abstract;
+    virtual QWORD getRAW(QWORD rva) abstract;
 };
 

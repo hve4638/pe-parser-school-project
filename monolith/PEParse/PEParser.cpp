@@ -82,6 +82,21 @@ namespace PEParse {
         }
     }
 
+    BOOL PEParser::tryGetCodeSectionHash(tstring& hash) {
+        DWORD offset;
+        DWORD size;
+        
+        if (m_peStruct->machineType == x86) {
+            offset = m_peStruct->ntHeader64.OptionalHeader.BaseOfCode;
+            size = m_peStruct->ntHeader64.OptionalHeader.SizeOfCode;
+        }
+        else {
+            offset = m_peStruct->ntHeader64.OptionalHeader.BaseOfCode;
+            size = m_peStruct->ntHeader64.OptionalHeader.SizeOfCode;
+        }
+        return tryMakeHashMD5(offset, size, hash);
+    }
+
     BOOL PEParser::tryGetEntryPointSectionHash(tstring& hash) {
         SectionInfo section;
 

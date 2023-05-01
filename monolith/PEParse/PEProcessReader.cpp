@@ -66,19 +66,20 @@ namespace PEParse {
     };
 
     tstring PEProcessReader::getPEString(ULONGLONG rva) {
-        SIZE_T readLength = 0;
-        BYTE byteChar[2] = { 0, };
-        ULONGLONG curOffset = rva;
+        BYTE bytes[2] = { 0, };
+        ULONGLONG offset = rva;
         string src;
-        do {
-            // 한 바이트씩 문자열을 읽음
-            if (readData(curOffset, &byteChar, sizeof(BYTE)) >= 0) {
-                src.append((char*)byteChar);
-                curOffset++;
-            }
-        } while (byteChar[0] != '\0');
 
-        return (tstring().assign(src.begin(), src.end()));
+        while (1) {
+            if (readData(offset, &bytes, sizeof(BYTE)) >= 0) {
+                src.append((char*)bytes);
+                offset++;
+            }
+
+            if (bytes[0] != '\0') break;
+        }
+
+        return tstring().assign(src.begin(), src.end());
     };
 
     tstring PEProcessReader::getPEStringNoBase(ULONGLONG rva) {
@@ -222,5 +223,9 @@ namespace PEParse {
             }
         }
         return loadedDlls;
+    }
+
+    QWORD PEProcessReader::getRAW(QWORD rva) {
+        return rva;
     }
 };

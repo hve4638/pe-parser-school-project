@@ -6,19 +6,16 @@ using namespace std;
 
 namespace PELog {
     void PEPrinter::printBaseAddress() {
-        auto peStructure = m_wkPEStruct.get();
-        tcout << format(_T("PE file: 0x{:x}, {:s}"), (ULONGLONG)peStructure->baseAddress, peStructure->filePath) << endl;
+        tcout << format(_T("PE file: 0x{:x}, {:s}"), (ULONGLONG)m_PEStructure->baseAddress, m_PEStructure->filePath) << endl;
     };
 
     void PEPrinter::printDosHeader() {
-        auto peStructure = m_wkPEStruct.get();
-        tcout << format(_T("DOS signature:                0x{:x}"), (WORD)peStructure->dosHeader.e_magic) << endl;
+        tcout << format(_T("DOS signature:                0x{:x}"), (WORD)m_PEStructure->dosHeader.e_magic) << endl;
     };
 
     void PEPrinter::printNTHeader() {
-        auto peStructure = m_wkPEStruct.get();
-        if (peStructure->machineType == x86) {
-            auto ntHeader = peStructure->ntHeader32;
+        if (m_PEStructure->machineType == x86) {
+            auto ntHeader = m_PEStructure->ntHeader32;
             tcout << format(_T("Machine type:                 0x{:x}"), (WORD)ntHeader.FileHeader.Machine) << endl;
             tcout << format(_T("Number of sections:           0x{:x}"), (WORD)ntHeader.FileHeader.NumberOfSections) << endl;
             tcout << format(_T("Timestamp:                    0x{:x}"), (DWORD)ntHeader.FileHeader.TimeDateStamp) << endl;
@@ -33,8 +30,7 @@ namespace PELog {
             tcout << format(_T("Number of RVA and sizes:      0x{:x}"), (DWORD)ntHeader.OptionalHeader.NumberOfRvaAndSizes) << endl;
         }
         else {
-            auto peStructure = m_wkPEStruct.get();
-            auto ntHeader = peStructure->ntHeader64;
+            auto ntHeader = m_PEStructure->ntHeader64;
             tcout << format(_T("Machine type:                 0x{:x}"), (WORD)ntHeader.FileHeader.Machine) << endl;
             tcout << format(_T("Number of sections:           0x{:x}"), (WORD)ntHeader.FileHeader.NumberOfSections) << endl;
             tcout << format(_T("Timestamp:                    0x{:x}"), (DWORD)ntHeader.FileHeader.TimeDateStamp) << endl;
@@ -51,8 +47,7 @@ namespace PELog {
     };
 
     void PEPrinter::printSectionHeader() {
-        auto peStructure = m_wkPEStruct.get();
-        for (auto const& element : peStructure->sectionList) {
+        for (auto const& element : m_PEStructure->sectionList) {
 
             tcout << format(_T("Section Name: {:s}"), element.Name) << endl;
             tcout << format(_T("          > VirtualAddress:   0x{:x}"), element.VirtualAddress) << endl;
@@ -63,8 +58,7 @@ namespace PELog {
     };
 
     void PEPrinter::printEAT() {
-        auto peStructure = m_wkPEStruct.get();
-        for (auto const& element : peStructure->exportList) {
+        for (auto const& element : m_PEStructure->exportList) {
             tcout << format(_T("EAT Module: {:s}"), element.Name) << endl;
             for (auto const& funcElement : element.FunctionInfo) {
                 tcout << format(_T("          > 0x{:x}, 0x{:x}, {:s}"), funcElement.AddressOfIAT, funcElement.Ordinal, funcElement.Name) << endl;
@@ -73,8 +67,7 @@ namespace PELog {
     };
 
     void PEPrinter::printIAT() {
-        auto peStructure = m_wkPEStruct.get();
-        for (auto const& element : peStructure->importList) {
+        for (auto const& element : m_PEStructure->importList) {
             tcout << format(_T("IAT Module: {:s}"), element.Name) << endl;
             for (auto const& funcElement : element.FunctionInfo) {
                 tcout << format(_T("          > 0x{:x}, 0x{:x}, {:s}"), funcElement.AddressOfIAT, funcElement.Ordinal, funcElement.Name) << endl;
@@ -83,10 +76,9 @@ namespace PELog {
     };
 
     void PEPrinter::printTLS() {
-        auto peStructure = m_wkPEStruct.get();
-        if (peStructure->tlsCallbackList.size() > 0) {
+        if (m_PEStructure->tlsCallbackList.size() > 0) {
             tcout << format(_T("TLS AddressOfCallBacks: ")) << endl;
-            for (auto const& element : peStructure->tlsCallbackList) {
+            for (auto const& element : m_PEStructure->tlsCallbackList) {
                 tcout << format(_T("          > 0x{:x}"), element) << endl;
             }
         }

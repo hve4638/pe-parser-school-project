@@ -65,10 +65,10 @@ namespace PEParse {
         return TRUE;
 	}
 
-	LPVOID PEFileReader::getBaseAddress(void) {
+	LPVOID PEFileReader::getBaseAddress() {
         return m_baseAddress;
 	}
-	tstring PEFileReader::getFilePath(void) {
+	tstring PEFileReader::getFilePath() {
         return m_filePath;
     }
 
@@ -127,6 +127,15 @@ namespace PEParse {
             debugPrint(format(_T("RVA to RAW fail : 0x{:x}, 0x{:x}"), (DWORD)GetLastError(), rva));
 
             return FALSE;
+        }
+    }
+
+    QWORD PEFileReader::getRAW(QWORD rva) {
+        if (setRvaToRawInfo(rva)) {
+            return rvaToRaw(rva, 0);
+        }
+        else {
+            return 0;
         }
     }
 }

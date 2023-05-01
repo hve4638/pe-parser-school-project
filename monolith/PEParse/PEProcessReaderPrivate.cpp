@@ -71,6 +71,30 @@ namespace PEParse {
                             }
                         }
                     }
+
+                    if (!ReadProcessMemory(m_processHandle, m_peb.Ldr, &pebLdrData, sizeof(PEB_LDR_DATA), &readData)) {
+                        // CONTAINING_RECORD 매크로
+                        // 첫번째 인자인 Address에는 현재알고 있는 구조체 필드중의 포인트를 입력하고 두번째 인자는 알고자하는 구조체 변수를 세번째 인자는 첫번째 알고있는 포인트 주소의 구조체 내에서 필드변수를 넣어줌
+                        // 그러면 두 번째에 입력했던 구조체 변수의 포인트 주소를 리턴함
+                        pFirstListEntry = CONTAINING_RECORD(pebLdrData.InMemoryOrderModuleList.Flink, LDR_DATA_TABLE_ENTRY, InMemoryOrderLinks);
+                        if (pFirstListEntry != NULL) {
+                            if (ReadProcessMemory(m_processHandle, pFirstListEntry, &ldrDataTable, sizeof(LDR_DATA_TABLE_ENTRY), &readData)) {
+                                if ((ULONGLONG)ldrDataTable.DllBase != 0x0) {
+                                    // 맨 처음 항목이 프로세스 자신
+                                    if (ReadProcessMemory(m_processHandle, ldrDataTable.FullDllName.Buffer, moduleNameBuffer, ldrDataTable.FullDllName.Length, &readData)) {
+                                        if (CHAR_IS_TCHAR) {
+                                            wstring modulePath = (PWSTR)moduleNameBuffer;
+                                            m_peFilePath.assign(modulePath.begin(), modulePath.end());
+                                        }
+                                        else {
+                                            m_peFilePath = (PWSTR)moduleNameBuffer;
+                                        }
+                                        debugPrint(format(_T("Module : 0x{:x}, {:s}"), (ULONGLONG)ldrDataTable.DllBase, m_peFilePath));
+                                    }
+                                }
+                            }
+                        }
+                    }
                     result = TRUE;
                     return TRUE;
                 }

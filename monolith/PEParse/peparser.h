@@ -17,8 +17,8 @@ namespace PEParse {
         BOOL parseDataDirectory();
         BOOL parseEAT();
         BOOL parseIAT();
-        BOOL parseIAT32(IMAGE_IMPORT_DESCRIPTOR& importDescriptor);
-        BOOL parseIAT64(IMAGE_IMPORT_DESCRIPTOR& importDescriptor);
+        BOOL parseImportDescriptor32(IMAGE_IMPORT_DESCRIPTOR& importDescriptor);
+        BOOL parseImportDescriptor64(IMAGE_IMPORT_DESCRIPTOR& importDescriptor);
         BOOL parseTLS();
         BOOL parseTLS32();
         BOOL parseTLS64();
@@ -44,5 +44,6 @@ namespace PEParse {
         BOOL tryGetSectionHash(const TCHAR* sectionName, tstring& hash);
         BOOL tryGetEntryPointSectionHash(tstring& hash);
         BOOL tryGetPDBFilePathHash(tstring& hash);
+        BOOL tryGetCodeSectionHash(tstring& hash);
     };
 }

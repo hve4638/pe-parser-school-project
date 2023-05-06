@@ -413,7 +413,7 @@ namespace PEParse {
             else if ((debugDirectory.Type != IMAGE_DEBUG_TYPE_CODEVIEW)) {
                 return FALSE;
             }
-            else if (m_peReader->readData((DWORD)debugDirectory.AddressOfRawData, &pdbInfo, sizeof(IMAGE_PDB_INFO)) >= 0) {
+            else if (m_peReader->readData((DWORD)debugDirectory.AddressOfRawData, &pdbInfo, sizeof(IMAGE_PDB_INFO)) < 0) {
                 return FALSE;
             }
             else if (pdbInfo.Signature != IMAGE_PDB_SIGNATURE) {

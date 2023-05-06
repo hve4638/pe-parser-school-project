@@ -5,6 +5,8 @@ VisualStudioVersion = 17.5.33424.131
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PEParse", "PEParse\PEParse.vcxproj", "{6E60C291-0FC0-4E2F-8FCB-600CD6A3D0D5}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PEParseTest", "PEParseTest\PEParseTest.vcxproj", "{14F9D4CA-6E42-4EAC-ABAD-4D450512858D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,14 @@ Global
 		{6E60C291-0FC0-4E2F-8FCB-600CD6A3D0D5}.Release|x64.Build.0 = Release|x64
 		{6E60C291-0FC0-4E2F-8FCB-600CD6A3D0D5}.Release|x86.ActiveCfg = Release|Win32
 		{6E60C291-0FC0-4E2F-8FCB-600CD6A3D0D5}.Release|x86.Build.0 = Release|Win32
+		{14F9D4CA-6E42-4EAC-ABAD-4D450512858D}.Debug|x64.ActiveCfg = Debug|x64
+		{14F9D4CA-6E42-4EAC-ABAD-4D450512858D}.Debug|x64.Build.0 = Debug|x64
+		{14F9D4CA-6E42-4EAC-ABAD-4D450512858D}.Debug|x86.ActiveCfg = Debug|Win32
+		{14F9D4CA-6E42-4EAC-ABAD-4D450512858D}.Debug|x86.Build.0 = Debug|Win32
+		{14F9D4CA-6E42-4EAC-ABAD-4D450512858D}.Release|x64.ActiveCfg = Release|x64
+		{14F9D4CA-6E42-4EAC-ABAD-4D450512858D}.Release|x64.Build.0 = Release|x64
+		{14F9D4CA-6E42-4EAC-ABAD-4D450512858D}.Release|x86.ActiveCfg = Release|Win32
+		{14F9D4CA-6E42-4EAC-ABAD-4D450512858D}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -22,6 +22,24 @@
     <Filter Include="소스 파일\PEPrinter">
       <UniqueIdentifier>{db813b67-a1de-4939-9fd3-9004ddd54ee1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="헤더 파일\Interface">
+      <UniqueIdentifier>{90f3858f-c704-4398-836a-622d393cc385}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Command">
+      <UniqueIdentifier>{8015f05b-c77a-42df-82e1-1512d48cea14}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Commands">
+      <UniqueIdentifier>{3d31e61a-98cb-4403-9a95-d6f843c6cfc7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Args">
+      <UniqueIdentifier>{46025791-b3ae-4086-8687-b051a26a37a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Args">
+      <UniqueIdentifier>{9830ba3b-d206-41bc-a966-cf97197808cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\PE">
+      <UniqueIdentifier>{1589e7fc-f1a4-4275-9d9c-85c3322431d7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -66,42 +84,36 @@
     <ClCompile Include="PEPrinterPrivate.cpp">
       <Filter>소스 파일\PEPrinter</Filter>
     </ClCompile>
+    <ClCompile Include="CommandNode.cpp">
+      <Filter>소스 파일\Command</Filter>
+    </ClCompile>
+    <ClCompile Include="CommandLineParser.cpp">
+      <Filter>소스 파일\Command</Filter>
+    </ClCompile>
+    <ClCompile Include="PECommandLineParser.cpp">
+      <Filter>소스 파일\Command</Filter>
+    </ClCompile>
+    <ClCompile Include="TStringArgs.h">
+      <Filter>헤더 파일\Args</Filter>
+    </ClCompile>
+    <ClCompile Include="RunnableLambda.cpp">
+      <Filter>소스 파일\Command</Filter>
+    </ClCompile>
+    <ClCompile Include="TCharArgs.cpp">
+      <Filter>소스 파일\Args</Filter>
+    </ClCompile>
+    <ClCompile Include="TStringArgs.cpp">
+      <Filter>소스 파일\Args</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="PEParser.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="typedef.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="IPEReader.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="PEFileReader.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="PEUtils.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="IPEParser.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="PEPrinter.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="ReserveDelete.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="PEProcessReader.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ICommandParser.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="IHashUtils.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ILogUtils.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="LogDirection.h">
@@ -109,6 +121,60 @@
     </ClInclude>
     <ClInclude Include="LogLevel.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="IHashUtils.h">
+      <Filter>헤더 파일\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="ILogUtils.h">
+      <Filter>헤더 파일\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="ICommandLineParser.h">
+      <Filter>헤더 파일\Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="ICommandNode.h">
+      <Filter>헤더 파일\Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandNode.h">
+      <Filter>헤더 파일\Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="PECommandLineParser.h">
+      <Filter>헤더 파일\Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandLineParser.h">
+      <Filter>헤더 파일\Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="IRunnable.h">
+      <Filter>헤더 파일\Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="IArgs.h">
+      <Filter>헤더 파일\Args</Filter>
+    </ClInclude>
+    <ClInclude Include="TCharArgs.h">
+      <Filter>헤더 파일\Args</Filter>
+    </ClInclude>
+    <ClInclude Include="RunnableLambda.h">
+      <Filter>헤더 파일\Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="IRunnableLambda.h">
+      <Filter>헤더 파일\Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="IPEReader.h">
+      <Filter>헤더 파일\PE</Filter>
+    </ClInclude>
+    <ClInclude Include="IPEParser.h">
+      <Filter>헤더 파일\PE</Filter>
+    </ClInclude>
+    <ClInclude Include="PEParser.h">
+      <Filter>헤더 파일\PE</Filter>
+    </ClInclude>
+    <ClInclude Include="PEPrinter.h">
+      <Filter>헤더 파일\PE</Filter>
+    </ClInclude>
+    <ClInclude Include="PEProcessReader.h">
+      <Filter>헤더 파일\PE</Filter>
+    </ClInclude>
+    <ClInclude Include="PEFileReader.h">
+      <Filter>헤더 파일\PE</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

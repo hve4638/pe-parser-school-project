@@ -116,7 +116,7 @@ namespace PEParse {
 
         tstring& pdbPath = m_peStruct->pdbPath;
         auto bytes = reinterpret_cast<const BYTE*>(pdbPath.c_str());
-        auto length = (DWORD)(pdbPath.size());
+        auto length = (DWORD)(pdbPath.size()) * sizeof(TCHAR);
 
         HashMD5Utils md5;
         return md5.tryGetMD5(bytes, length, hash);

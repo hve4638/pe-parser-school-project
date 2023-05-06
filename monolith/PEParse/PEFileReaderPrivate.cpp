@@ -6,7 +6,7 @@
 using namespace PEUtils;
 
 namespace PEParse {
-    PEPOS PEFileReader::rvaToRaw(PEPOS rva, PEPOS addPosition = 0) {
+    QWORD PEFileReader::rvaToRaw(QWORD rva, QWORD addPosition = 0) {
         // RAW = RVA - VirtualAddress + PointerToRawData
         if (addPosition != 0) {
             return addPosition + (rva - m_rawInfo.virtualAddress + m_rawInfo.pointerToRawData);
@@ -17,7 +17,7 @@ namespace PEParse {
     }
 
 
-    BOOL PEFileReader::setRvaToRawInfo(PEPOS rva) {
+    BOOL PEFileReader::setRvaToRawInfo(QWORD rva) {
         if (m_sectionInfo.headerAddress == NULL) {
             updateSectionInfo();
         }

@@ -9,14 +9,22 @@ namespace PEUtils {
 #endif
     }
 
-    void copyStringToTString(LPVOID& src, tstring& dst) {
+    tstring copyStringToTString(string& source) {
+        tstring dest;
         if (CHAR_IS_TCHAR) {
-            dst = reinterpret_cast<TCHAR*>(src);
+            dest.assign(source.begin(), source.end());
         }
         else {
-            string tmpString = reinterpret_cast<char*>(src);
-            dst.assign(tmpString.begin(), tmpString.end());
+            int bufferLen = MultiByteToWideChar(CP_UTF8, 0, reinterpret_cast<LPCCH>(source.data()), -1, NULL, 0);
+
+            auto buffer = make_shared<TCHAR>(bufferLen);
+            //TCHAR* readBuffer = new TCHAR[bufferLen];
+            
+            MultiByteToWideChar(CP_UTF8, 0, reinterpret_cast<LPCCH>(source.data()), -1, buffer.get(), bufferLen);
+            dest = buffer.get();
         }
+
+        return dest;
     }
     
     void printBuffer(BYTE* buffer, SIZE_T size) {
@@ -52,5 +60,24 @@ namespace PEUtils {
         readString = byteBufferW.get();
 
         return readString;
+    }
+
+    vector<tstring> splitString(tstring str) {
+        vector<basic_string<TCHAR>> tokens;
+        basic_string<TCHAR> temp;
+        
+        for (const auto& ch : str) {
+            if (ch != _T(' ')) {
+                temp += ch;
+            }
+            else if (!temp.empty()) {
+                tokens.push_back(temp);
+                temp.clear();
+            }
+        }
+        if (!temp.empty()) {
+            tokens.push_back(temp);
+        }
+        return tokens;
     }
 }

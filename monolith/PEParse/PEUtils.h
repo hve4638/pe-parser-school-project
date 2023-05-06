@@ -3,8 +3,9 @@
 
 namespace PEUtils {
     void debugPrint(tstring debugMessage);
-    void copyStringToTString(LPVOID& src, tstring& dst);
-    void printBuffer(BYTE*, SIZE_T);
+    tstring copyStringToTString(string& source);
+    void printBuffer(BYTE* offset, SIZE_T size);
     void deleteStruct(void**);
     tstring convertToUTF8(BYTE* byteBuffer, size_t srcLength);
+    vector<tstring> splitString(tstring str);
 }

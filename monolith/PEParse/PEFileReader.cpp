@@ -73,29 +73,55 @@ namespace PEParse {
     }
 
     tstring PEFileReader::getPEString(PEPOS rva) {
-        tstring readString;
+        QWORD offset = rva;
+        BYTE bytes[2] = { 0, };
+
         if (setRvaToRawInfo(rva)) {
-            LPVOID realAddress = (LPVOID)rvaToRaw(rva, (PEPOS)m_baseAddress);
-            copyStringToTString(realAddress, readString);
-        }
-        else {
-            debugPrint(format(_T("Rva to Raw fail : 0x{:x}, 0x{:x}"), (DWORD)GetLastError(), rva));
+            QWORD raw = rvaToRaw(rva, reinterpret_cast<QWORD>(m_baseAddress));
+
+            if (sizeof(TCHAR) == sizeof(char)) {
+                return (TCHAR*)(raw);
+            }
+            else {
+                int bufferLen = MultiByteToWideChar(CP_UTF8, 0, (LPCCH)(raw), -1, NULL, 0);
+
+                tstring dest;
+                auto buffer = new TCHAR[bufferLen];
+                MultiByteToWideChar(CP_UTF8, 0, (LPCCH)(raw), -1, buffer, bufferLen);
+                dest = buffer;
+                
+                delete[] buffer;
+                return dest;
+            }
         }
 
-        return readString;
-    };
+        return _T("");
+    }
 
     tstring PEFileReader::getPEStringNoBase(PEPOS rva) {
-        tstring readString;
+        QWORD offset = rva;
+        BYTE bytes[2] = { 0, };
+
         if (setRvaToRawInfo(rva)) {
-            LPVOID realAddress = (LPVOID)rvaToRaw(rva, 0);
-            PEUtils::copyStringToTString(realAddress, readString);
+            QWORD raw = rvaToRaw(rva, 0x0);
+
+            if (sizeof(TCHAR) == sizeof(char)) {
+                return (TCHAR*)(raw);
+            }
+            else {
+                int bufferLen = MultiByteToWideChar(CP_UTF8, 0, (LPCCH)(raw), -1, NULL, 0);
+
+                tstring dest;
+                auto buffer = new TCHAR[bufferLen];
+                MultiByteToWideChar(CP_UTF8, 0, (LPCCH)(raw), -1, buffer, bufferLen);
+                dest = buffer;
+
+                delete[] buffer;
+                return dest;
+            }
         }
-        else {
-            debugPrint(format(_T("Rva to Raw fail : 0x{:x}, 0x{:x}"), (DWORD)GetLastError(), rva));
-        }
-        
-        return readString;
+
+        return _T("");
     };
     
     SSIZE_T PEFileReader::readData(PEPOS rva, LPVOID bufferAddress, SIZE_T bufferSize) {

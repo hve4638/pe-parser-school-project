@@ -128,9 +128,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CommandLineParser.cpp" />
+    <ClCompile Include="CommandNode.cpp" />
     <ClCompile Include="HashMD5Utils.cpp" />
     <ClCompile Include="HashMD5Utils.h" />
+    <ClCompile Include="RunnableLambda.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="PECommandLineParser.cpp" />
     <ClCompile Include="PEFileReader.cpp" />
     <ClCompile Include="PEFileReaderPrivate.cpp" />
     <ClCompile Include="PEParser.cpp" />
@@ -142,20 +146,32 @@
     <ClCompile Include="PEProcessReaderPrivate.cpp" />
     <ClCompile Include="PEUtils.cpp" />
     <ClCompile Include="ReserveDelete.cpp" />
+    <ClCompile Include="TCharArgs.cpp" />
+    <ClCompile Include="TStringArgs.cpp" />
+    <ClCompile Include="TStringArgs.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ICommandParser.h" />
+    <ClInclude Include="CommandNode.h" />
+    <ClInclude Include="CommandLineParser.h" />
+    <ClInclude Include="ICommandNode.h" />
+    <ClInclude Include="ICommandLineParser.h" />
     <ClInclude Include="IHashUtils.h" />
+    <ClInclude Include="IRunnableLambda.h" />
     <ClInclude Include="ILogUtils.h" />
     <ClInclude Include="IPEParser.h" />
+    <ClInclude Include="IArgs.h" />
+    <ClInclude Include="RunnableLambda.h" />
     <ClInclude Include="LogDirection.h" />
     <ClInclude Include="LogLevel.h" />
+    <ClInclude Include="PECommandLineParser.h" />
     <ClInclude Include="PEProcessReader.h" />
     <ClInclude Include="PEPrinter.h" />
     <ClInclude Include="PEUtils.h" />
     <ClInclude Include="PEFileReader.h" />
     <ClInclude Include="IPEReader.h" />
     <ClInclude Include="ReserveDelete.h" />
+    <ClInclude Include="IRunnable.h" />
+    <ClInclude Include="TCharArgs.h" />
     <ClInclude Include="typedef.h" />
     <ClInclude Include="PEParser.h" />
   </ItemGroup>

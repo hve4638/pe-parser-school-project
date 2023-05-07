@@ -18,16 +18,14 @@ using namespace LogUtils;
 void testPrint();
 void testScan();
 void testLogging();
+
 int _tmain(int argc, TCHAR* argv[]) {
+    PECommandLineParser cmdRunner; 
     setlocale(LC_ALL, "");
-    testLogging();
-    //testScan();
 
-    //PEParser parser;
-    //PEPrinter printer;
-    //auto path = _T("C:\\Windows\\System32\\shell322.dll");
-
-    //parser.parsePEFile(path);
+    // 첫 인자는 프로그램 경로이므로 제외
+    IArgsPtr args = make_shared<TCharArgs>(argc-1, argv+1);
+    cmdRunner.runCommand(args);
 
     return 0;
 }

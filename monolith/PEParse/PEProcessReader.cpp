@@ -58,7 +58,7 @@ namespace PEParse {
                 close();
 
                 m_logger << LogLevel::ERR;
-                m_logger << ErrorLogInfo(_T("Open process fail : get ImageBase Address fail")) << NL;
+                m_logger << ErrorLogInfo(_T("Open process fail : fail to get ImageBaseAddress ")) << NL;
                 return FALSE;
             }
         }

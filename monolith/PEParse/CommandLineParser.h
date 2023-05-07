@@ -2,11 +2,14 @@
 #include "ICommandLineParser.h"
 #include "ICommandNode.h"
 #include "RunnableLambda.h"
+#include "Logger.h"
 #include <functional>
+using namespace LogUtils;
 
 namespace CommandLineUtils {
     class CommandLineParser : public ICommandLineParser {
         shared_ptr<ICommandNode> m_root;
+        Logger m_logger = { LogLevel::ALL, LogDirection::DEBUGVIEW };
 
     public:
         CommandLineParser();

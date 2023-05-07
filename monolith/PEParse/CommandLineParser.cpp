@@ -14,6 +14,10 @@ namespace CommandLineUtils {
         if (node && node->isRunnable()) {
             node->run(args);
         }
+        else {
+            
+            //m_logger << 
+        }
     }
 
     void CommandLineParser::runCommand(tstring str) {

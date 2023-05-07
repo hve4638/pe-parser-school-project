@@ -18,7 +18,8 @@ namespace PEParse {
         PEB m_peb = { 0, };
         pNtQueryInformationProcess m_pNtQueryInformationProcess = NULL;
 
-        BOOL parseImageBaseAddress(void);
+        BOOL parseImageBaseAddress();
+        BOOL parsePEFilePath();
     public:
         PEProcessReader();
         ~PEProcessReader() override;
@@ -32,7 +33,6 @@ namespace PEParse {
         tstring getFilePath() override;
         QWORD getRAW(QWORD rva) override;
 
-    public:
         BOOL open(DWORD pid);
         BOOL createProcess(tstring filePath);
         LoadedDllsInfo getLoadedDlls(void);

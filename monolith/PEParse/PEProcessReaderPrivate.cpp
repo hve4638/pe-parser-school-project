@@ -9,7 +9,6 @@ using namespace std;
 using namespace PEUtils;
 
 namespace PEParse {
-
     BOOL PEProcessReader::parseImageBaseAddress() {
         BOOL result = FALSE;
         NTSTATUS status = 0;
@@ -33,7 +32,8 @@ namespace PEParse {
                 return FALSE;
             }
             else if (!ReadProcessMemory(m_processHandle, processBasicInformation.PebBaseAddress, &m_peb, sizeof(PEB), &readData)) {
-                debugPrint(format(_T("ReadProcessMemory fail : 0x{:x}"), (DWORD)GetLastError()));
+                m_logger << LogLevel::ERR;
+                m_logger << ErrorLogInfo(_T("ReadProcessMemory fail")) << NL;
                 return FALSE;
             }
             else {
@@ -42,11 +42,13 @@ namespace PEParse {
                 // (ToolHelp32 API를 통해서 구하는 방법도 있음)
                 m_peBaseAddress = m_peb.Reserved3[1];
                 if (m_peBaseAddress == NULL) {
-                    debugPrint(format(_T("Get image base address fail : 0x{:x}"), (DWORD)GetLastError()));
+                    m_logger << LogLevel::ERR;
+                    m_logger << ErrorLogInfo(_T("Get image base address fail")) << NL;
                     return FALSE;
                 }
                 else {
-                    debugPrint(format(_T("Process image base address : 0x{:x}"), (ULONGLONG)m_peBaseAddress));
+                    m_logger << LogLevel::DEBUG;
+                    m_logger << format(_T("Process image base address : 0x{:x}"), (ULONGLONG)m_peBaseAddress) << NL;
 
                     if (ReadProcessMemory(m_processHandle, m_peb.Ldr, &pebLdrData, sizeof(PEB_LDR_DATA), &readData)) {
                         // CONTAINING_RECORD 매크로
@@ -65,7 +67,9 @@ namespace PEParse {
                                         else {
                                             m_peFilePath = (PWSTR)moduleNameBuffer;
                                         }
-                                        debugPrint(format(_T("Module : 0x{:x}, {:s}"), (ULONGLONG)ldrDataTable.DllBase, m_peFilePath));
+
+                                        m_logger << LogLevel::DEBUG;
+                                        m_logger << format(_T("Module : 0x{:x}, {:s}"), (ULONGLONG)ldrDataTable.DllBase, m_peFilePath) << NL;
                                     }
                                 }
                             }
@@ -89,7 +93,9 @@ namespace PEParse {
                                         else {
                                             m_peFilePath = (PWSTR)moduleNameBuffer;
                                         }
-                                        debugPrint(format(_T("Module : 0x{:x}, {:s}"), (ULONGLONG)ldrDataTable.DllBase, m_peFilePath));
+
+                                        m_logger << LogLevel::DEBUG;
+                                        m_logger << format(_T("Module : 0x{:x}, {:s}"), (ULONGLONG)ldrDataTable.DllBase, m_peFilePath) << NL;
                                     }
                                 }
                             }

@@ -10,3 +10,5 @@ namespace PEParse {
         virtual shared_ptr<PEStructure> getPEStructure() abstract;
     };
 }
+
+

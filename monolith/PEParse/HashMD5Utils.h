@@ -1,9 +1,12 @@
 #include "IHashUtils.h"
+#include "Logger.h"
+using namespace LogUtils;
 
 namespace PEUtils {
     class HashMD5Utils : public IHashUtils {
         HCRYPTPROV m_prov = NULL;
         HCRYPTHASH m_hash = NULL;
+        Logger m_logger = { LogDirection::DEBUGVIEW, LogLevel::DEBUG };
 
         BOOL bytesToString(const BYTE* hashBytes, DWORD srcLength, tstring& outString);
     public:

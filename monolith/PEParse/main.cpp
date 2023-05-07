@@ -1,11 +1,10 @@
+#include "Logger.h"
 #include "PEParser.h"
 #include "PEPrinter.h"
 #include "PEUtils.h"
-#include "ReserveDelete.h"
 #include "HashMD5Utils.h"
 #include "TCharArgs.h"
 #include "TStringArgs.h"
-#include <map>
 #include "CommandNode.h"
 #include "CommandLineParser.h"
 #include "PECommandLineParser.h"
@@ -14,31 +13,51 @@ using namespace CommandLineUtils;
 using namespace PEParse;
 using namespace PELog;
 using namespace PEUtils;
+using namespace LogUtils;
 
-void testPE();
+void testPrint();
+void testScan();
+void testLogging();
 int _tmain(int argc, TCHAR* argv[]) {
     setlocale(LC_ALL, "");
-    PECommandLineParser cmdRunner;
+    testLogging();
+    //testScan();
 
-    auto args = makeArgs(_T("scan file C:\\Temp\\DetectMe.exe 60754a02d83c8dca4384b1f2bdeb86a8"));
-    cmdRunner.runCommand(args);
+    //PEParser parser;
+    //PEPrinter printer;
+    //auto path = _T("C:\\Windows\\System32\\shell322.dll");
 
-    args.reset();
-    args = makeArgs(_T("scan file  C:\\Temp\\DetectMe.exe 26978c26dfd84a5645d0190214bbada7"));
-    cmdRunner.runCommand(args);
+    //parser.parsePEFile(path);
 
-    args.reset();
-    //args = makeArgs(_T("print file C:\\Temp\\DetectMe.exe"));
-    //cmdRunner.runCommand(args);
-    
     return 0;
 }
 
-void testPE() {
+void testLogging() {
+    // 모든 레벨의 로그를 CONSOLE로 출력하는 logger 생성
+    Logger logger = { LogLevel::ALL, LogDirection::CONSOLE }; 
+    {
+        // DEBUG 로그레벨로 메세지 출력
+        logger << LogLevel::DEBUG;
+        logger << _T("Debug Message") << NL;
+    }
+    {
+        // ERR 로그레벨로 ErrorLogInfo 출력
+        // 메세지, LastError 값, 에러가 발생한 함수 이름, 위치가 출력됨
+        logger << LogLevel::ERR;
+        logger << ErrorLogInfo(_T("Debug Message"), GetLastError(), ERRLOG_EXTRA_FUNCTION) << NL;
+    }
+}
+
+void testScan() {
+    PECommandLineParser cmdRunner;
+
+    cmdRunner.runCommand(_T("scan file C:\\Temp\\DetectMe.exe 60754a02d83c8dca4384b1f2bdeb86a8"));
+    cmdRunner.runCommand(_T("scan file  C:\\Temp\\DetectMe.exe 26978c26dfd84a5645d0190214bbada7"));
+}
+
+void testPrint() {
     PEParser parser;
     PEPrinter printer;
-    //auto path = _T("C:\\Users\\hve46\\Documents\\project\\git\\pe-parser\\KeyHook86.dll");
-    //auto path = _T("C:\\Users\\hve46\\Documents\\project\\git\\pe-parser-school-project\\HEMacro.dll");
     auto path = _T("C:\\Windows\\System32\\shell32.dll");
 
     parser.parsePEFile(path);

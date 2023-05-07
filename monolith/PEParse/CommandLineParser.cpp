@@ -23,6 +23,7 @@ namespace CommandLineUtils {
     }
 
     void CommandLineParser::addCommand(IArgsPtr args, shared_ptr<IRunnable> runnable) {
+        // root노드부터 각 인자에 해당하는 노드를 찾아서 리턴하고, 없다면 생성해서 리턴한다.
         auto wkPtr = m_root->findNodeForcefully(args);
         shared_ptr<ICommandNode> node = wkPtr.lock();
 

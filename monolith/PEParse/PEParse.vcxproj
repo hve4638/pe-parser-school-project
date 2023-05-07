@@ -130,8 +130,10 @@
   <ItemGroup>
     <ClCompile Include="CommandLineParser.cpp" />
     <ClCompile Include="CommandNode.cpp" />
+    <ClCompile Include="ErrorLogInfo.cpp" />
     <ClCompile Include="HashMD5Utils.cpp" />
     <ClCompile Include="HashMD5Utils.h" />
+    <ClCompile Include="Logger.cpp" />
     <ClCompile Include="RunnableLambda.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PECommandLineParser.cpp" />
@@ -157,9 +159,12 @@
     <ClInclude Include="ICommandLineParser.h" />
     <ClInclude Include="IHashUtils.h" />
     <ClInclude Include="IRunnableLambda.h" />
-    <ClInclude Include="ILogUtils.h" />
+    <ClInclude Include="ILogger.h" />
     <ClInclude Include="IPEParser.h" />
     <ClInclude Include="IArgs.h" />
+    <ClInclude Include="Logger.h" />
+    <ClInclude Include="ErrorLogInfo.h" />
+    <ClInclude Include="LogNL.h" />
     <ClInclude Include="RunnableLambda.h" />
     <ClInclude Include="LogDirection.h" />
     <ClInclude Include="LogLevel.h" />

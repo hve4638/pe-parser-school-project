@@ -5,7 +5,6 @@
 using namespace std;
 
 namespace PELog {
-    static auto println = []() { tcout << std::endl << _T("---------------------------------------------------------------------------------") << std::endl; };
 
     PEPrinter::PEPrinter() {
         m_PEStructure.reset();
@@ -13,11 +12,13 @@ namespace PELog {
     PEPrinter::PEPrinter(shared_ptr<PEStructure> peStructWeakPtr) {
         m_PEStructure = peStructWeakPtr;
     };
-    PEPrinter::~PEPrinter() { };
-
     void PEPrinter::reset(shared_ptr<PEStructure> peStructWeakPtr) {
         m_PEStructure = peStructWeakPtr;
     }
+
+    PEPrinter::~PEPrinter() { };
+
+    static auto println = []() { tcout << std::endl << _T("---------------------------------------------------------------------------------") << std::endl; };
 
     void PEPrinter::printPEStructure() {
         println();

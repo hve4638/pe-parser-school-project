@@ -12,7 +12,9 @@ namespace PEParse {
 
     PEProcessReader::PEProcessReader() {
         HMODULE hModule = GetModuleHandle(_T("ntdll.dll"));
+
         if (hModule != NULL) {
+            // ntdll.dll 에서 NtQueryInformationProcess 함수를 동적으로 가져옴
             m_pNtQueryInformationProcess = (pNtQueryInformationProcess)GetProcAddress(hModule, "NtQueryInformationProcess");
             if (m_pNtQueryInformationProcess != NULL) {
 
@@ -35,26 +37,33 @@ namespace PEParse {
     };
 
     BOOL PEProcessReader::open(DWORD pid, const TCHAR* pfilePath) {
-        BOOL result = FALSE;
+        if (pid <= 0x4) {
+            return FALSE;
+        }
 
-        if (pid > 0x4) {
-            m_processHandle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
-            if (m_processHandle != NULL) {
-                result = parseImageBaseAddress();
-                if (result) {
-                    m_processId = pid;
-                }
-                else {
-                    // Image Base Address를 얻지 못한 경우 실패로 처리(변수 초기화)
-                    close();
-                    debugPrint(_T("Open process fail : get image base address fail"));
-                }
+        m_processHandle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
+
+        if (m_processHandle == NULL) {
+            m_logger << LogLevel::ERR;
+            m_logger << ErrorLogInfo(_T("Open process fail")) << NL;
+            return FALSE;
+        }
+        else {
+            if (parseImageBaseAddress()) {
+                m_processId = pid;
+                return TRUE;
             }
             else {
-                debugPrint(format(_T("Open process fail : 0x{:x}"), (DWORD)GetLastError()));
+                // Image Base Address를 얻지 못한 경우 실패
+                close();
+
+                m_logger << LogLevel::ERR;
+                m_logger << ErrorLogInfo(_T("Open process fail : get ImageBase Address fail")) << NL;
+                return FALSE;
             }
         }
-        return result;
+
+        return FALSE;
     };
 
     LPVOID PEProcessReader::getBaseAddress(void) {
@@ -71,6 +80,7 @@ namespace PEParse {
         string src;
 
         while (1) {
+            // 문자열의 길이를 알 수 없기 때문에 한문자씩 읽어들임
             if (readData(offset, &bytes, sizeof(BYTE)) >= 0) {
                 src.append((char*)bytes);
                 offset++;
@@ -79,7 +89,21 @@ namespace PEParse {
             if (bytes[0] != '\0') break;
         }
 
-        return tstring().assign(src.begin(), src.end());
+        if (CHAR_IS_TCHAR) {
+            return tstring().assign(src.begin(), src.end());
+        }
+        else {
+            // UTF-8로 저장된 문자열을 WCHAR로 변환
+            int bufferLen = MultiByteToWideChar(CP_UTF8, 0, reinterpret_cast<LPCCH>(src.data()), -1, NULL, 0);
+
+            TCHAR* buffer = new TCHAR[bufferLen];
+            MultiByteToWideChar(CP_UTF8, 0, reinterpret_cast<LPCCH>(src.data()), -1, buffer, bufferLen);
+
+            tstring dest = buffer;
+            delete[] buffer;
+
+            return dest;
+        }
     };
 
     tstring PEProcessReader::getPEStringNoBase(ULONGLONG rva) {
@@ -97,7 +121,8 @@ namespace PEParse {
             result = ReadProcessMemory(m_processHandle, (LPCVOID)((ULONGLONG)m_peBaseAddress + rva), bufferAddress, bufferSize, &readLength);
 
             if (!result) {
-                debugPrint(format(_T("ReadProcessMemory fail : 0x{:x}, 0x{:x}"), (DWORD)GetLastError(), rva));
+                m_logger << LogLevel::DEBUG;
+                m_logger << ErrorLogInfo(format(_T("ReadProcessMemory fail (RVA : 0x{:x})"), rva)) << NL;
                 return -1;
             }
             else {
@@ -116,7 +141,8 @@ namespace PEParse {
             result = ReadProcessMemory(m_processHandle, (LPCVOID)(rva), bufferAddress, bufferSize, &readLength);
 
             if (!result) {
-                debugPrint(format(_T("ReadProcessMemory fail : 0x{:x}, 0x{:x}"), (DWORD)GetLastError(), rva));
+                m_logger << LogLevel::ALL;
+                m_logger << ErrorLogInfo(format(_T("ReadProcessMemory fail (RVA : 0x{:x})"), rva)) << NL;
                 return -1;
             }
             else {
@@ -156,11 +182,13 @@ namespace PEParse {
             if (!result) {
                 // Image Base Address를 얻지 못한 경우 실패로 처리(변수 초기화)
                 close();
-                debugPrint(_T("Create process fail : get image base address fail"));
+                m_logger << LogLevel::ERR;
+                m_logger << ErrorLogInfo(_T("Create process fail : get image base address fail")) << NL;
             }
         }
         else {
-            debugPrint(format(_T("Create process fail : 0x{:x}"), (DWORD)GetLastError()));
+            m_logger << LogLevel::ERR;
+            m_logger << ErrorLogInfo(_T("Create process fail")) << NL;
         }
         return result;
     };
@@ -180,7 +208,8 @@ namespace PEParse {
         */
         
         if (m_peBaseAddress == NULL || m_peb.Ldr == NULL) {
-            debugPrint(_T("Get loaded dlls fail - PEB.Ldr is NULL."));
+            m_logger << LogLevel::ERR;
+            m_logger << ErrorLogInfo(_T("Get loaded dlls fail - PEB.Ldr is NULL.")) << NL;
         }
         else if (ReadProcessMemory(m_processHandle, m_peb.Ldr, &pebLdrData, sizeof(PEB_LDR_DATA), &readData)) {
             // CONTAINING_RECORD 매크로

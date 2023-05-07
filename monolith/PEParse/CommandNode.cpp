@@ -65,6 +65,7 @@ namespace CommandLineUtils {
     weak_ptr<ICommandNode> CommandNode::getPtr() {
         return m_selfPtr;
     }
+
     void CommandNode::setPtr(weak_ptr<ICommandNode> wkPtr) {
         m_selfPtr = wkPtr;
     }

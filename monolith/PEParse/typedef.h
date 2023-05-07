@@ -19,7 +19,6 @@ using namespace std;
 #define MD5_LENGTH 16
 #define CHAR_IS_TCHAR (sizeof(TCHAR) == sizeof(char))
 typedef ULONGLONG QWORD;
-typedef ULONGLONG PEPOS;
 typedef basic_string<TCHAR> tstring;
 
 typedef struct _LoadedDllInfo {

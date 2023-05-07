@@ -12,7 +12,7 @@ namespace CommandLineUtils {
         int m_current = -1;
         SIZE_T m_argc = 0;
         StoreType m_storeType = StoreType::NONE;
-        shared_ptr<tstring> m_array = NULL;
+        tstring *m_array = NULL;
         shared_ptr<vector<tstring>> m_vector = NULL;
 
         BOOL isValidIndex(int index);

@@ -41,14 +41,15 @@ namespace PEUtils {
     }
 
     BOOL HashMD5Utils::tryGetMD5ToBytes(const BYTE* data, size_t len, BYTE* hash) {
-        // 해시 결과 가져오기
         DWORD hashLen = 16;
         if (!CryptHashData(m_hash, data, (DWORD)len, 0)) {
-            std::cerr << "Error: CryptHashData failed." << std::endl;
+            m_logger << LogLevel::ERR;
+            m_logger << ErrorLogInfo(_T("CryptHashData failed.")) << NL;
             return FALSE;
         }
         else if (!CryptGetHashParam(m_hash, HP_HASHVAL, hash, &hashLen, 0)) {
-            std::cerr << "Error: CryptGetHashParam failed." << std::endl;
+            m_logger << LogLevel::ERR;
+            m_logger << ErrorLogInfo(_T("CryptGetHashParam failed")) << NL;
             return FALSE;
         }
         else {

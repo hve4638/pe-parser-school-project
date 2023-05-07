@@ -11,11 +11,15 @@ using namespace PEUtils;
 namespace PEParse {
     BOOL PEParser::parseDosHeader() {
         if (m_peReader->readData(0x0, &m_peStruct->dosHeader, sizeof(IMAGE_DOS_HEADER)) < 0) {
-            debugPrint(_T("Error: Fail to read DOS header\n"));
+            m_logger << LogLevel::ERR;
+            m_logger << ErrorLogInfo(_T("Error: Fail to read DOS header")) << NL;
+
             return FALSE;
         }
         else if (m_peStruct->dosHeader.e_magic != IMAGE_DOS_SIGNATURE) {
-            debugPrint(_T("Error: Invalid DOS header signature\n"));
+            m_logger << LogLevel::ERR;
+            m_logger << ErrorLogInfo(_T("Error: Invalid DOS header signature")) << NL;
+
             return FALSE;
         }
         else {
@@ -24,14 +28,18 @@ namespace PEParse {
     }
 
     BOOL PEParser::parseNtHeader() {
-        PEPOS pNtHeader = m_peStruct->dosHeader.e_lfanew;
+        QWORD pNtHeader = m_peStruct->dosHeader.e_lfanew;
         IMAGE_NT_HEADERS32 ntHeader = { 0, };
         if (m_peReader->readData(pNtHeader, &ntHeader, sizeof(IMAGE_NT_HEADERS32)) < 0) {
-            debugPrint(_T("Error: Fail to read DOS header\n"));
+            m_logger << LogLevel::ERR;
+            m_logger << ErrorLogInfo(_T("Error: Fail to read NT header")) << NL;
+
             return FALSE;
         }
         else if (ntHeader.Signature != IMAGE_NT_SIGNATURE) {
-            debugPrint(_T("Error: Invalid NT header signature\n"));
+            m_logger << LogLevel::ERR;
+            m_logger << ErrorLogInfo(_T("Error: Invalid NT header signature")) << NL;
+
             return FALSE;
         }
         else {
@@ -65,10 +73,7 @@ namespace PEParse {
         else {
             sectionHeaderOffset = m_peStruct->dosHeader.e_lfanew + sizeof(IMAGE_NT_HEADERS64);
             numberOfSections = m_peStruct->ntHeader64.FileHeader.NumberOfSections;
-
         }
-
-        
 
         SIZE_T count;
         count = updateSectionHeaders(sectionHeaderOffset, numberOfSections);
@@ -97,6 +102,7 @@ namespace PEParse {
         }
         return count;
     }
+
     BOOL PEParser::parseDataDirectory() {
         size_t dataSize = sizeof(IMAGE_DATA_DIRECTORY) * IMAGE_NUMBEROF_DIRECTORY_ENTRIES;
         IMAGE_DATA_DIRECTORY *dataDirectory;
@@ -110,6 +116,8 @@ namespace PEParse {
         memcpy_s(&m_peStruct->dataDirectory, dataSize, dataDirectory, dataSize);
         return TRUE;
     }
+
+
     BOOL PEParser::parseEAT() {
         ReserveDelete reserveDelete;
         vector<PEFunctionInfo> funcInfoVector;
@@ -126,6 +134,7 @@ namespace PEParse {
             return FALSE;
         }
 
+        // 등록한 동적 할당된 주소를 함수 종료시 할당해제하는 코드
         reserveDelete
             .addRef((void**)&nameOrdinals)
             .addRef((void**)&nameAddresses)
@@ -135,7 +144,6 @@ namespace PEParse {
         nameOrdinals = new WORD[exportDirectory.NumberOfNames];
         nameAddresses = new DWORD[exportDirectory.NumberOfNames];
         functionAddresses = new DWORD[exportDirectory.NumberOfFunctions];
-
 
         // 전체 함수 주소 배열에서 함수 이름이 존재하는 함수를 체크하기 위한 배열 생성
         // 함수 이름이 존재하는 함수 주소의 위치에 이름 문자열의 RVA를 배열에 저장
@@ -151,14 +159,14 @@ namespace PEParse {
 
             DWORD ordinalBase = (DWORD)exportDirectory.Base;
             PEFunctionInfo funcInfo = { 0, };
-            // Export하는 전체 함수들에 대한 정보를 출력
             for (DWORD i = 0; i < exportDirectory.NumberOfFunctions; i++) {
                 DWORD nameRVA = functionNamesRVA[i];             // 이름이 존재하는 함수
-                DWORD addressOfIAT = functionAddresses[i];   // Ordinal로만 Export하는 함수
-                DWORD ordinal = ordinalBase + i;             // ordinal = Base + functionAddress index(nameOrdinal)
+                DWORD addressOfIAT = functionAddresses[i];       // Ordinal로만 Export하는 함수
+                DWORD ordinal = ordinalBase + i;                 // ordinal = Base + functionAddress index(nameOrdinal)
 
                 if (nameRVA != NULL && addressOfIAT != NULL) {
-                    debugPrint(format(_T("Export address is invalid > 0x{:x}, 0x{:x}"), addressOfIAT, ordinal));
+                    m_logger << LogLevel::DEBUG;
+                    m_logger << ErrorLogInfo(_T("Export address is invalid > 0x{:x}, 0x{:x}")) << NL;
                 }
                 else {
                     funcInfo.AddressOfIAT = addressOfIAT;
@@ -210,6 +218,8 @@ namespace PEParse {
             return FALSE;
         }
         else {
+            // ImportDescriptor 구조체의 배열을 차례대로 읽어옴
+            // 배열의 끝은 NULL 구조체
             while (m_peReader->readData(va, &importDescriptor, sizeof(IMAGE_IMPORT_DESCRIPTOR)) >= 0 && (importDescriptor.OriginalFirstThunk != 0x0)) {
                 if (m_peStruct->machineType == x86) {
                     if (parseImportDescriptor32(importDescriptor)) {
@@ -236,6 +246,8 @@ namespace PEParse {
         vector<PEFunctionInfo> funcInfoVector;
         WORD funcNameOrdinal = 0;
 
+        // IMAGE_THUNK_DATA32 (Import Name Table) 구조체의 배열을 차례대로 읽어옴
+        // 배열의 끝은 NULL 구조체
         DWORD firstThunkAddress = importDescriptor.FirstThunk;
         DWORD importNameTablePosition = importDescriptor.OriginalFirstThunk;
         while ((m_peReader->readData((DWORD)firstThunkAddress, &thunkData, TRUNK_DATASIZE) >= 0) && (thunkData.u1.AddressOfData != 0x0)) {
@@ -245,7 +257,7 @@ namespace PEParse {
                 DWORD ordinalValue = (thunkData.u1.Ordinal << 1) >> 1; // 최상위 비트 제거
 
                 // 원래 값과 비교해서 다르면 최상위 비트가 1로 설정 됐다는 의미
-                // 최상위 비트가 1로 설정된 경우에는 Ordinal만 있는 함수
+                // 최상위 비트가 1로 설정된 경우에는 이름없이 Ordinal만 있는 함수
                 if (ordinalValue != thunkData.u1.Ordinal) {
                     PEFunctionInfo funcInfo;
                     funcInfo.AddressOfIAT = addressOfIAT;
@@ -254,7 +266,7 @@ namespace PEParse {
 
                     funcInfoVector.push_back(funcInfo);
                 }
-                // Hint(Ordinal)와 함수 이름 읽기
+                // Ordinal, 함수 이름 읽기
                 else if (m_peReader->readData(thunkData.u1.AddressOfData, &funcNameOrdinal, sizeof(WORD)) >= 0) {
                     PEFunctionInfo funcInfo;
                     funcInfo.AddressOfIAT = addressOfIAT;
@@ -353,7 +365,8 @@ namespace PEParse {
         if (m_peReader->readData((DWORD)va, &tlsDirectory, sizeof(IMAGE_TLS_DIRECTORY32)) >= 0) {
             DWORD curCallbackArrayAddress = tlsDirectory.AddressOfCallBacks;
 
-            // 프로세스에서는 IMAGE_TLS_DIRECTORY32 구조체 내의 값들이 RVA가 아닌 실제 주소(VA)로 저장되어 있기 때문에 m_peBaseAddress를 더해주지 않고 메모리 주소 그대로 읽음
+            // 프로세스에서는 IMAGE_TLS_DIRECTORY32 구조체 내의 값들이 RVA가 아닌 실제 주소로 저장되어 있음으로 readDataNoBase를 사용
+            // 마지막이 NULL 구조체인 배열 형태
             while ((m_peReader->readDataNoBase((DWORD)curCallbackArrayAddress, &callbackAddress, sizeof(DWORD)) >= 0) && (callbackAddress != 0x0)) {
                 m_peStruct->tlsCallbackList.push_back((QWORD)callbackAddress);
                 curCallbackArrayAddress += sizeof(DWORD);
@@ -420,6 +433,7 @@ namespace PEParse {
                 return FALSE;
             }
             else {
+                // PDB 경로 저장
                 QWORD rva = (DWORD)debugDirectory.AddressOfRawData + (sizeof(DWORD) * 2) + (sizeof(BYTE) * 16);
                 m_peStruct->pdbPath = m_peReader->getPEString(rva);
 

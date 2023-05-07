@@ -1,14 +1,16 @@
 #pragma once
 #include "IPEReader.h"
 #include "IPEParser.h"
+#include "Logger.h"
+
+using namespace LogUtils;
 
 namespace PEParse {
     class PEParser : IPEParser {
-    protected:
         shared_ptr<PEStructure> m_peStruct;
         shared_ptr<IPEReader> m_peReader;
+        Logger m_logger = { LogDirection::DEBUGVIEW, LogLevel::ALL };
 
-    private:
         tstring getString(const char* srcString, size_t srcLength);
         BOOL parseDosHeader();
         BOOL parseNtHeader();
@@ -24,7 +26,8 @@ namespace PEParse {
         BOOL parseTLS64();
         BOOL parseDebug();
 
-        BOOL tryReadExportDirectoryInfo(IMAGE_EXPORT_DIRECTORY exportDirectory, DWORD* pFuncAddress, DWORD* pNameAddress, WORD* pNameOrdinal);
+        BOOL tryReadExportDirectoryInfo(IMAGE_EXPORT_DIRECTORY exportDirectory,
+            DWORD* pFuncAddress, DWORD* pNameAddress, WORD* pNameOrdinal);
         DWORD getAddressOfEntryPoint();
 
         BOOL findSectionAsName(const TCHAR* sectionName, SectionInfo& info);
@@ -47,3 +50,7 @@ namespace PEParse {
         BOOL tryGetCodeSectionHash(tstring& hash);
     };
 }
+
+
+
+

@@ -17,7 +17,7 @@ namespace CommandLineUtils {
 
     TStringArgs::TStringArgs(int argc, tstring argv[]) {
         m_argc = argc;
-        m_array.reset(argv);
+        m_array = argv;
         m_storeType = StoreType::ARRAY;
     }
 
@@ -41,7 +41,7 @@ namespace CommandLineUtils {
                 return m_vector->at(index);
 
             case StoreType::ARRAY:
-                return m_array.get()[index];
+                return m_array[index];
 
             default:
                 return _T("");
@@ -63,7 +63,7 @@ namespace CommandLineUtils {
 
     tstring TStringArgs::previous() {
         m_current--;
-        return current();
+        return current();   
     }
 
     BOOL TStringArgs::hasPrevious() {

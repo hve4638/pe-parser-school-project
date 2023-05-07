@@ -4,7 +4,7 @@
 
 namespace CommandLineUtils {
     class RunnableLambda : public virtual IRunnableLambda {
-        function<void(shared_ptr<IArgs>)> m_call;
+        CommandLambda m_call;
 
     public:
         RunnableLambda(CommandLambda call);

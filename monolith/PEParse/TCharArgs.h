@@ -5,7 +5,7 @@ namespace CommandLineUtils {
     class TCharArgs : public IArgs {
         int m_current = -1;
         int m_argc = 0;
-        shared_ptr<TCHAR*> m_argv = NULL;
+        TCHAR** m_argv = NULL;
 
         BOOL isValidIndex(int index);
     public:

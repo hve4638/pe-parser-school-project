@@ -19,13 +19,22 @@ namespace PEParse {
 
     BOOL PEFileReader::setRvaToRawInfo(QWORD rva) {
         if (m_sectionInfo.headerAddress == NULL) {
+            // rvaToRaw를 위한 정보를 업데이트
             updateSectionInfo();
         }
-
+        
+        // rva 주소가 PEHeader 부분일 경우
+        // PEHeader의 rva은 raw와 동일
         if (rva < m_sectionInfo.sizeOfHeaders) {
+            m_rawInfo.startAddress = 0;
+            m_rawInfo.endAddress = 0;
+            m_rawInfo.virtualAddress = 0;
+            m_rawInfo.pointerToRawData = 0;
+
             return TRUE;
         }
-        else if (rva >= m_rawInfo.startAddress && rva < m_rawInfo.endAddress) {
+        // 이미 변환 준비가 되었을때
+        else if (rva >= m_rawInfo.startAddress && rva < m_rawInfo.endAddress) { 
             return TRUE;
         }
         else {
@@ -33,6 +42,7 @@ namespace PEParse {
         }
     }
 
+    // SectionHeader 정보를 멤버변수에 저장
     void PEFileReader::updateSectionInfo() {
         IMAGE_NT_HEADERS32* pNtHeader32 = reinterpret_cast<IMAGE_NT_HEADERS32*>(m_baseAddress + (LONG)((IMAGE_DOS_HEADER*)m_baseAddress)->e_lfanew);
 
@@ -50,12 +60,17 @@ namespace PEParse {
         }
     }
 
-    BOOL PEFileReader::tryUpdateRawInfo(PEPOS rva) {
+    BOOL PEFileReader::tryUpdateRawInfo(QWORD rva) {
         m_rawInfo.startAddress = 0;
         m_rawInfo.endAddress = 0;
         m_rawInfo.virtualAddress = 0;
         m_rawInfo.pointerToRawData = 0;
 
+        /*
+            각 섹션의 VirtualAddress부터 Virtualaddress + SizeOfRawData 범위 내에 있는지 체크후 rawInfo 설정
+            VirtualSize내에 포함되어도 SizeOfRawData를 벗어난다면 raw를 정의할 수 없음
+            어떤 섹션의 범위에도 포함되지 않는다면 raw로 변환할 수 없음
+        */
         auto count = m_sectionInfo.numberOfSections;
         for (DWORD i = 0; i < count; i++) {
             IMAGE_SECTION_HEADER& header = (m_sectionInfo.headerAddress[i]);

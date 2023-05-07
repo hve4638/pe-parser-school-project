@@ -3,13 +3,13 @@
 namespace CommandLineUtils {
     TCharArgs::TCharArgs(int argc, TCHAR* argv[]) {
         m_argc = argc;
-        m_argv.reset(argv);
+        m_argv = argv;
     }
 
     tstring TCharArgs::current() {
         auto index = this->m_current;
         if (isValidIndex(index)) {
-            return m_argv.get()[index];
+            return m_argv[index];
         }
         else {
             return _T("");

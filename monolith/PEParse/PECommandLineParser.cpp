@@ -3,18 +3,19 @@
 #include "PECommandLineParser.h"
 #include "peparser.h"
 #include "PEPrinter.h"
-
+    
 using namespace PEParse;
 using namespace PELog;
 //using namespace PEUtils;
 
 namespace CommandLineUtils {
     PECommandLineParser::PECommandLineParser() {
-        addCommand(_T("help"),
-            [](IArgsPtr args) {
-                tcout << _T("뭐") << endl;
-            }
-        );
+        /*
+            생성자에서 PEParser를 위한 명령어를 추가
+
+            "print file" 라는 인자에 명령어를 추가했을때
+            "print file 1 2"가 입력되면 "print file"에 등록된 명령어에 "1 2" 인자를 넣어 호출함
+        */ 
         addCommand(_T("print file"),
             [](IArgsPtr args) {
                 tstring filename = args->next();

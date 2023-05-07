@@ -22,9 +22,6 @@
     <Filter Include="소스 파일\PEPrinter">
       <UniqueIdentifier>{db813b67-a1de-4939-9fd3-9004ddd54ee1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="헤더 파일\Interface">
-      <UniqueIdentifier>{90f3858f-c704-4398-836a-622d393cc385}</UniqueIdentifier>
-    </Filter>
     <Filter Include="소스 파일\Command">
       <UniqueIdentifier>{8015f05b-c77a-42df-82e1-1512d48cea14}</UniqueIdentifier>
     </Filter>
@@ -39,6 +36,12 @@
     </Filter>
     <Filter Include="헤더 파일\PE">
       <UniqueIdentifier>{1589e7fc-f1a4-4275-9d9c-85c3322431d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Logger">
+      <UniqueIdentifier>{473d2ad9-c097-4653-892f-30df171fc642}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Logger">
+      <UniqueIdentifier>{7bc8a26c-5b3f-453f-b466-443945d72dfe}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -105,6 +108,12 @@
     <ClCompile Include="TStringArgs.cpp">
       <Filter>소스 파일\Args</Filter>
     </ClCompile>
+    <ClCompile Include="Logger.cpp">
+      <Filter>소스 파일\Logger</Filter>
+    </ClCompile>
+    <ClCompile Include="ErrorLogInfo.cpp">
+      <Filter>소스 파일\Logger</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="typedef.h">
@@ -115,18 +124,6 @@
     </ClInclude>
     <ClInclude Include="ReserveDelete.h">
       <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="LogDirection.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="LogLevel.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="IHashUtils.h">
-      <Filter>헤더 파일\Interface</Filter>
-    </ClInclude>
-    <ClInclude Include="ILogUtils.h">
-      <Filter>헤더 파일\Interface</Filter>
     </ClInclude>
     <ClInclude Include="ICommandLineParser.h">
       <Filter>헤더 파일\Commands</Filter>
@@ -175,6 +172,27 @@
     </ClInclude>
     <ClInclude Include="PEFileReader.h">
       <Filter>헤더 파일\PE</Filter>
+    </ClInclude>
+    <ClInclude Include="IHashUtils.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ILogger.h">
+      <Filter>헤더 파일\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="LogDirection.h">
+      <Filter>헤더 파일\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="LogLevel.h">
+      <Filter>헤더 파일\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="Logger.h">
+      <Filter>헤더 파일\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="LogNL.h">
+      <Filter>헤더 파일\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="ErrorLogInfo.h">
+      <Filter>헤더 파일\Logger</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -16,6 +16,5 @@ namespace CommandLineUtils {
         virtual void setPtr(weak_ptr<ICommandNode>) abstract;
     };
 
-
     typedef shared_ptr<ICommandNode> ICommandNodePtr;
 }

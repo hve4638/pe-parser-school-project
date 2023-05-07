@@ -22,7 +22,7 @@ namespace PEParse {
         if (m_fileHandle != NULL) {
             CloseHandle(m_fileHandle);
         }
-        m_baseAddress = NULL;
+        m_baseAddress = NULL;   
 	}
 
     BOOL PEFileReader::open(DWORD pid, const TCHAR* filePath) {
@@ -30,17 +30,24 @@ namespace PEParse {
     }
 
 	BOOL PEFileReader::open(const TCHAR* filePath) {
+        /*
+            파일을 열고 메모리에 매핑한다.
+            모든 과정이 성공시 TRUE를 리턴하고, 실패시 과정 중 연 핸들을 정리하고 FALSE를 리턴한다.
+        */
         if (filePath == NULL) {
             return FALSE;
         }
         close();
 
         m_filePath = filePath;
-        debugPrint(format(_T("Create memory map : {:s}\n"), m_filePath));
+        m_logger << LogLevel::DEBUG;
+        m_logger << format(_T("Create memory map : {:s}"), m_filePath) << NL;
 
         m_fileHandle = CreateFile(m_filePath.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
         if (m_fileHandle == INVALID_HANDLE_VALUE) {
-            debugPrint(_T("Error: Cannot open file\n"));
+            m_logger << LogLevel::ERR;
+            m_logger << ErrorLogInfo(_T("Error: Cannot open file")) << NL;
+
             return FALSE;
         }
 
@@ -48,7 +55,9 @@ namespace PEParse {
         if (m_fileMapping == NULL) {
             CloseHandle(m_fileHandle);
             m_fileHandle = NULL;
-            debugPrint(_T("Error: Cannot create file mapping\n"));
+
+            m_logger << LogLevel::ERR;
+            m_logger << ErrorLogInfo(_T("Error: Cannot create file mapping")) << NL;
             return FALSE;
         }
 
@@ -58,7 +67,9 @@ namespace PEParse {
             CloseHandle(m_fileHandle);
             m_fileMapping = NULL;
             m_fileHandle = NULL;
-            debugPrint(_T("Error: Cannot map view of file\n"));
+
+            m_logger << LogLevel::ERR;
+            m_logger << ErrorLogInfo(_T("Error: Cannot map view of file")) << NL;
             return FALSE;
         }
 
@@ -68,21 +79,25 @@ namespace PEParse {
 	LPVOID PEFileReader::getBaseAddress() {
         return m_baseAddress;
 	}
+
 	tstring PEFileReader::getFilePath() {
         return m_filePath;
     }
 
-    tstring PEFileReader::getPEString(PEPOS rva) {
+    tstring PEFileReader::getPEString(QWORD rva) {
         QWORD offset = rva;
         BYTE bytes[2] = { 0, };
 
+        // rva가 raw로 변환가능하다면 TRUE 리턴
         if (setRvaToRawInfo(rva)) {
+            // rva를 raw로 변환하고 base 주소를 더함
             QWORD raw = rvaToRaw(rva, reinterpret_cast<QWORD>(m_baseAddress));
 
-            if (sizeof(TCHAR) == sizeof(char)) {
+            if (CHAR_IS_TCHAR) {
                 return (TCHAR*)(raw);
             }
             else {
+                // UTF-8로 저장된 문자열을 WCHAR로 변환
                 int bufferLen = MultiByteToWideChar(CP_UTF8, 0, (LPCCH)(raw), -1, NULL, 0);
 
                 tstring dest;
@@ -98,17 +113,20 @@ namespace PEParse {
         return _T("");
     }
 
-    tstring PEFileReader::getPEStringNoBase(PEPOS rva) {
+    tstring PEFileReader::getPEStringNoBase(QWORD rva) {
         QWORD offset = rva;
         BYTE bytes[2] = { 0, };
 
+        // rva가 raw로 변환가능하다면 TRUE 리턴
         if (setRvaToRawInfo(rva)) {
+            // rva를 raw로 변환
             QWORD raw = rvaToRaw(rva, 0x0);
-
-            if (sizeof(TCHAR) == sizeof(char)) {
+            
+            if (CHAR_IS_TCHAR) {
                 return (TCHAR*)(raw);
             }
             else {
+                // UTF-8로 저장된 문자열을 WCHAR로 변환
                 int bufferLen = MultiByteToWideChar(CP_UTF8, 0, (LPCCH)(raw), -1, NULL, 0);
 
                 tstring dest;
@@ -124,35 +142,37 @@ namespace PEParse {
         return _T("");
     };
     
-    SSIZE_T PEFileReader::readData(PEPOS rva, LPVOID bufferAddress, SIZE_T bufferSize) {
-        LPVOID realAddress = NULL;
-
+    SSIZE_T PEFileReader::readData(QWORD rva, LPVOID bufferAddress, SIZE_T bufferSize) {
+        // rva가 raw로 변환가능하다면 TRUE 리턴
         if (setRvaToRawInfo(rva)) {
-            realAddress = (LPVOID)rvaToRaw(rva, (PEPOS)m_baseAddress);
+            // rva를 raw로 변환하고 base 주소를 추가한 값을 리턴
+            LPVOID realAddress = (LPVOID)rvaToRaw(rva, (QWORD)m_baseAddress);
             memcpy_s(bufferAddress, bufferSize, realAddress, bufferSize);
 
             return bufferSize;
         }
         else {
-            debugPrint(format(_T("RVA to RAW fail : 0x{:x}, 0x{:x}"), (DWORD)GetLastError(), rva));
+            m_logger << LogLevel::DEBUG;
+            m_logger << ErrorLogInfo(format(_T("RVA to RAW fail (rva : 0x{:x})"), rva)) << NL;
 
             return -1;
         }
     }
     
-    SSIZE_T PEFileReader::readDataNoBase(PEPOS rva, LPVOID bufferAddress, SIZE_T bufferSize) {
-        LPVOID realAddress = NULL;
-        
+    SSIZE_T PEFileReader::readDataNoBase(QWORD rva, LPVOID bufferAddress, SIZE_T bufferSize) {
+        // rva가 raw로 변환가능하다면 TRUE 리턴
         if (setRvaToRawInfo(rva)) {
-            realAddress = (LPVOID)rvaToRaw(rva, 0);
-
+            // rva를 raw로 변환, base 주소를 추가하지 않음
+            LPVOID realAddress = (LPVOID)rvaToRaw(rva, 0x00);
             memcpy_s(bufferAddress, bufferSize, realAddress, bufferSize);
+
             return bufferSize;
         }
         else {
-            debugPrint(format(_T("RVA to RAW fail : 0x{:x}, 0x{:x}"), (DWORD)GetLastError(), rva));
+            m_logger << LogLevel::DEBUG;
+            m_logger << ErrorLogInfo(format(_T("RVA to RAW fail (rva : 0x{:x})"), rva)) << NL;
 
-            return FALSE;
+            return -1;
         }
     }
 

@@ -5,7 +5,7 @@
 
 namespace CommandLineUtils {
     interface ICommandLineParser {
-        virtual void runCommand(shared_ptr<IArgs>) abstract;
-        virtual void addCommand(shared_ptr<IArgs>, shared_ptr<IRunnable>) abstract;
+        virtual void runCommand(IArgsPtr) abstract;
+        virtual void addCommand(IArgsPtr, shared_ptr<IRunnable>) abstract;
     };
 }
